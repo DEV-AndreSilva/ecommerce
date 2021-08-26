@@ -16,14 +16,14 @@ class Page
      *
      * @param array $opts - Dados a ser renderizados
      */
-    public function __construct($opts= array())
+    public function __construct($opts= array(),$tpl_dir="/views/")
     {
         //Mesclando array padrão com os parametros recebidos
         $this->options = array_merge($this->defaults, $opts);
 
         //Configuração do TPL, local das paginas e local onde sera salvo o cache da página renderizada
         $config = array(
-            "tpl_dir"=>$_SERVER['DOCUMENT_ROOT']."/views/",
+            "tpl_dir"=>$_SERVER['DOCUMENT_ROOT'].$tpl_dir,
             "cache_dir"=>$_SERVER['DOCUMENT_ROOT']."/cache/",
             "debug"=>false
         );
