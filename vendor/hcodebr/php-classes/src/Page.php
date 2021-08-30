@@ -8,6 +8,8 @@ class Page
     private $tpl; //Objeto que guarda a instancia do TPL
     private $options=[]; //Array que guarda as opções(dados que serão renderizados)
     private $defaults = [
+        "header"=>true,
+        "footer"=>true,
         "data"=>[]
     ]; //Opções padrões
 
@@ -30,15 +32,15 @@ class Page
 
         //Configurando o TPL
         tpl::configure($config);
-
+        
         //Instanciando objeto da classe TPL
         $this->tpl = new Tpl;
 
         //Percorrendo parametros recebidos e criando as variaveis com dados para o TPL
         $this->setData($this->options["data"]);
 
-        //Desenhando cabeçalho da página
-        $this->tpl->draw("header");
+        //Desenhando cabeçalho da página se o header for true
+       if ($this->options['header']) $this->tpl->draw("header");
     }
 
     /**
@@ -68,8 +70,8 @@ class Page
      */
     public function __destruct()
     {
-        //Desenhando rodapé da página
-        $this->tpl->draw("footer");
+        //Desenhando rodapé da página se o footer for true
+        if ($this->options['footer']) $this->tpl->draw("footer");
     }
 }
 

@@ -5,7 +5,7 @@
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => 'c790d2b14bbdcb50dc67bb4ef3ad4bab1b380552',
+        'reference' => '22a31575a3d92fed9d4c215443e14c1bda06a38d',
         'name' => 'andre/ecommerce',
         'dev' => true,
     ),
@@ -16,7 +16,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => 'c790d2b14bbdcb50dc67bb4ef3ad4bab1b380552',
+            'reference' => '22a31575a3d92fed9d4c215443e14c1bda06a38d',
             'dev_requirement' => false,
         ),
         'phpmailer/phpmailer' => array(
