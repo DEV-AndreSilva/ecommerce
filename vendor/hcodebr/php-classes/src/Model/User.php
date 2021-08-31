@@ -81,4 +81,91 @@ class User extends Model
         $_SESSION[User::SESSION]= null;
     }
 
+    /**
+     * Método responsável por listar todos os usuários do sistema
+     *
+     * @return array
+     */
+    public static function listAll()
+    {
+        $sql= new Sql();
+        $result =$sql->select("select * from tb_users a inner join tb_persons b using(idperson) order by b.desperson");
+        return $result;
+    }
+
+    /**
+     * Método responsável por salvar registros no banco de dados
+     *
+     * @return void
+     */
+    public function save()
+    {
+        $sql= new Sql();
+
+        $result=$sql->select("CALL sp_users_save(:desperson, :deslogin, :despassword, :desemail, :nrphone, :inadmin)",array(
+            ":desperson"=>$this->getdesperson(),
+            ":deslogin"=>$this->getdeslogin(),
+            ":despassword"=>$this->getdespassword(),
+            ":desemail"=>$this->getdesemail(),
+            ":nrphone"=>$this->getnrphone(),
+            ":inadmin"=>$this->getinadmin()
+            ));
+
+            $this->setData($result[0]);
+
+    }
+
+    /**
+     * Método responsável pela busca e preenchimento de um objeto usuário do banco de dados
+     *
+     * @param integer $iduser
+     * @return void
+     */
+    public function get($iduser)
+    {
+        $sql = new sql();
+        $results = $sql->select("select * from tb_users a inner join tb_persons b using(idperson) where a.iduser =:iduser", array(
+            ":iduser"=>$iduser
+        ));
+
+        $this->setData($results[0]);
+    }
+
+    /**
+     * Método responsável por atualizar um registro no banco de dados
+     *
+     * @return void
+     */
+    public function update()
+    {
+        $sql= new Sql();
+
+        $result=$sql->select("CALL sp_usersupdate_save(:iduser,:desperson, :deslogin, :despassword, :desemail, :nrphone, :inadmin)",array(
+            ":iduser"=>$this->getiduser(),
+            ":desperson"=>$this->getdesperson(),
+            ":deslogin"=>$this->getdeslogin(),
+            ":despassword"=>$this->getdespassword(),
+            ":desemail"=>$this->getdesemail(),
+            ":nrphone"=>$this->getnrphone(),
+            ":inadmin"=>$this->getinadmin()
+            ));
+
+            $this->setData($result[0]);
+    }
+
+    /**
+     * Método responsável por excluir um registro do banco de dados
+     *
+     * @return void
+     */
+    public function delete()
+    {
+        $sql= new sql();
+        $sql->query("CALL sp_users_delete(:iduser)", array(
+            ":iduser"=>$this->getiduser()
+        ));
+    }
+
+
+
 }
