@@ -27,8 +27,8 @@ class User extends Model
         $sql=new Sql();
 
         //Procura o usuário na base de dados
-        $result= $sql->select("select * from tb_users where deslogin = :LOGIN", array(
-            ":LOGIN"=>$login
+        $result= $sql->select("SELECT * FROM tb_users WHERE deslogin = :login", array(
+            ":login"=>$login
         ));
 
         //Verifica se foi encontrado o usuário
@@ -43,6 +43,7 @@ class User extends Model
         //Verifica se a senha inserida corresponde a senha do usuário
         if(password_verify($password, $data['despassword']))
         {
+            var_dump($data);
             //Cria um objeto usuário
             $user= new User();
             //Preenche um array com os dados desse objeto
@@ -95,7 +96,7 @@ class User extends Model
     public static function listAll()
     {
         $sql= new Sql();
-        $result =$sql->select("select * from tb_users a inner join tb_persons b using(idperson) order by b.desperson");
+        $result =$sql->select("SELECT * FROM tb_users a INNER JOIN tb_persons b USING(idperson) order by b.desperson");
         return $result;
     }
 
@@ -130,7 +131,7 @@ class User extends Model
     public function get($iduser)
     {
         $sql = new sql();
-        $results = $sql->select("select * from tb_users a inner join tb_persons b using(idperson) where a.iduser =:iduser", 
+        $results = $sql->select("SELECT * FROM tb_users a INNER JOIN tb_persons b USING(idperson) WHERE a.iduser =:iduser", 
         array(
             ":iduser"=>$iduser
         ));
@@ -185,10 +186,10 @@ class User extends Model
 
         //Procura o usuario com esse email no sistema
         $results = $sql ->select(
-            "select *
-            from tb_persons a
-            inner join tb_users b using(idperson)
-            where a.desemail = :email;",
+            "SELECT *
+            FROM tb_persons a
+            INNER JOIN tb_users b USING(idperson)
+            WHERE a.desemail = :email;",
             array(
                 ":email"=>$email
             )
@@ -273,10 +274,10 @@ class User extends Model
         
         $sql = new Sql();
 
-        $result = $sql->select("select * from tb_userspasswordsrecoveries a
-                     inner join tb_users b using(iduser)
-                     inner join tb_persons c using(idperson)
-                     where a.idrecovery = :idrecovery AND
+        $result = $sql->select("SELECT * FROM tb_userspasswordsrecoveries a
+                     INNER JOIN tb_users b USING(iduser)
+                     INNER JOIN tb_persons c USING(idperson)
+                     WHERE a.idrecovery = :idrecovery AND
                      a.dtrecovery is null AND
                      DATE_ADD(a.dtregister, INTERVAL 1 HOUR) >= NOW();"
                     , array(
@@ -304,7 +305,7 @@ class User extends Model
     {
         $sql= new Sql();
 
-        $sql->query("Update tb_userspasswordsrecoveries set dtrecovery = NOW() where idrecovery = :idrecovery", array(
+        $sql->query("UPDATE tb_userspasswordsrecoveries set dtrecovery = NOW() WHERE idrecovery = :idrecovery", array(
             ":idrecovery"=>$idRecovery
         ));
     }
@@ -318,7 +319,7 @@ class User extends Model
     public function setPassword($password)
     {
         $sql = new Sql();
-        $sql->query("update tb_users set despassword = :password where iduser= :iduser", array(
+        $sql->query("UPDATE tb_users set despassword = :password WHERE iduser= :iduser", array(
             ':password'=>$password,
             ':iduser'=>$this->getiduser()
         ));
