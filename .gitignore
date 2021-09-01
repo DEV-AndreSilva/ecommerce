@@ -1,3 +1,2 @@
 composer.lock
-hosts
-httpd-vhosts.conf
+vendor/hcodebr/php-classes/src/Mailer/config.php
