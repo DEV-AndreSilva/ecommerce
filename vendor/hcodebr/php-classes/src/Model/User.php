@@ -5,10 +5,16 @@ namespace Hcode\Model;
 use Exception;
 use \Hcode\Model\Model;
 use \Hcode\DB\Sql;
+use \Hcode\Mailer\Mailer;
 
 class User extends Model
 {
     const SESSION = "User";
+    const SECRET = "AndrePHP7_Secret";
+	const SECRET_IV = "AndrePHP7_Secret_IV";
+	const ERROR = "UserError";
+	const ERROR_REGISTER = "UserErrorRegister";
+	const SUCCESS = "UserSucesss";
 
     /**
      * Método responsável por realizar o Login do usuário
@@ -163,6 +169,158 @@ class User extends Model
         $sql= new sql();
         $sql->query("CALL sp_users_delete(:iduser)", array(
             ":iduser"=>$this->getiduser()
+        ));
+    }
+
+    /**
+     * Método responsável por validar o email de quem vai recuperar a senha e e chamar o envio de email
+     *
+     * @param string $email
+     * @param boolean $inadmin
+     * @return void
+     */
+    public static function getForgot($email, $inadmin = true)
+    {
+        $sql = new Sql();
+
+        //Procura o usuario com esse email no sistema
+        $results = $sql ->select(
+            "select *
+            from tb_persons a
+            inner join tb_users b using(idperson)
+            where a.desemail = :email;",
+            array(
+                ":email"=>$email
+            )
+        );
+        
+        //Verifica se o usuario existe
+        if(count($results)===0)
+        {
+           throw new \Exception("Não foi possivel recuperar a senha",1);
+        }
+        else
+        {
+            //Recebe os dados do usuário
+            $data= $results[0];
+
+            //Cria um registro de recuperação do usuário
+            $recovery = $sql->select("CALL sp_userspasswordsrecoveries_create(:iduser,:desip)", array(
+                ":iduser"=>$data['iduser'],
+                ":desip"=>$_SERVER['REMOTE_ADDR']
+            ));
+
+            //Verifica se foi criado o registro da recuperação
+            if(count($recovery)===0)
+            {
+                throw new \Exception("ão foi possivel recuperar a senha",1);
+            }
+            //Cria o link com o código de recuperação que será enviado por email e envia o email
+            else
+            {
+                self::sendEmail($recovery[0],$inadmin,$data);
+            }
+        }
+
+    }
+
+    /**
+     * Método responsável por enviar email
+     *
+     * @param array $dataRecovery
+     * @param bool $inadmin
+     * @param array $dataUser
+     * @return void
+     */
+    private static function sendEmail($dataRecovery,$inadmin,$dataUser)
+    {
+                //Criptografia dos dados
+                $code = openssl_encrypt($dataRecovery['idrecovery'],'AES-128-CBC',pack("a16",User::SECRET),0,pack('a16',User::SECRET_IV));
+                $code = base64_encode($code);;
+
+                if($inadmin===true)
+                {
+                    //Link de recuperação de senha do administrador
+                    $link = "http://www.andrecommerce.com.br/admin/forgot/reset?code=$code";
+                }
+
+                else
+                {
+                    //Link de recuperação de senha do usuário comum
+                    $link = "http://www.hcodecommerce.com.br/forgot/reset?code=$code";
+                }
+                
+                //Instanciando classe que realizara o envio do email
+                $mailer = new Mailer($dataUser['desemail'],$dataUser['desperson'],"Redefinir a senha da HCODE Store", "forgot", array(
+                    "name"=>$dataUser['desperson'],
+                    "link"=>$link
+                ));
+
+                //Enviando Email de recuperação para o usuário
+                $mailer->send();
+    }
+
+    /**
+     * Método responsavel por validar o código de recuperação
+     *
+     * @param string $code
+     * @return mixed
+     */
+    public static function validForgotDecrypt($code)
+    {
+    
+        $idRecovery=openssl_decrypt(base64_decode($code),'AES-128-CBC',pack("a16",USER::SECRET),0,pack("a16",USER::SECRET_IV));
+        
+        $sql = new Sql();
+
+        $result = $sql->select("select * from tb_userspasswordsrecoveries a
+                     inner join tb_users b using(iduser)
+                     inner join tb_persons c using(idperson)
+                     where a.idrecovery = :idrecovery AND
+                     a.dtrecovery is null AND
+                     DATE_ADD(a.dtregister, INTERVAL 1 HOUR) >= NOW();"
+                    , array(
+                        ":idrecovery"=>$idRecovery
+                    ));
+        
+        //Se não houver resultados o código é invalido
+        if(count($result)===0)
+        {
+            throw new \Exception("Não foi possivel recuperar a senha",1);
+        }
+        else
+        {
+            return $result[0];
+        }
+    }
+
+    /**
+     * Método responsável por invalidar um código de recuperação ja usado
+     *
+     * @param integer $idRecovery
+     * @return void
+     */
+    public static function setForgotUsed($idRecovery)
+    {
+        $sql= new Sql();
+
+        $sql->query("Update tb_userspasswordsrecoveries set dtrecovery = NOW() where idrecovery = :idrecovery", array(
+            ":idrecovery"=>$idRecovery
+        ));
+    }
+
+    /**
+     * Método responsável por trocar a senha do usuário no banco de dados
+     *
+     * @param string $password
+     * @return void
+     */
+    public function setPassword($password)
+    {
+        $sql = new Sql();
+        $sql->query("update tb_users set despassword = :password where iduser= :iduser", array(
+            ':password'=>$password,
+            ':iduser'=>$this->getiduser()
         ));
     }
 
