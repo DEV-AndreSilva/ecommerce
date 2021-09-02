@@ -70,6 +70,11 @@ class Category extends Model
         Category::updateFile();
     }
 
+    /**
+     * Método responsável por construir dinamicamente os links do menu de categorias na pagina views/categories-menu.html
+     *
+     * @return void
+     */
     public static function updateFile()
     {
         $categories= Category::listAll();

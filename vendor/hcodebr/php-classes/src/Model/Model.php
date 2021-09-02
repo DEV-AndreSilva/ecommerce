@@ -36,8 +36,8 @@ class Model
     }
 
     /**
-     * Método responsável por receber os dados do banco e preencher os valores do array $values
-     * @param array $data - array que recebe os valores que preencheram os atributos do objeto
+     * Método responsável criar e atualizar os atributos de um objeto
+     * @param array $data - array que recebe os valores que preencherão os atributos do objeto
      */
     public function setData($data= array())
     {

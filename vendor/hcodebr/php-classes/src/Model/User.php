@@ -174,7 +174,7 @@ class User extends Model
     }
 
     /**
-     * Método responsável por validar o email de quem vai recuperar a senha e e chamar o envio de email
+     * Método responsável por validar o email de quem vai recuperar a senha e chamar o envio de email
      *
      * @param string $email
      * @param boolean $inadmin
