@@ -1,6 +1,6 @@
 <?php
 
-use Hcode\PageAdmin;
+use Hcode\Pages\PageAdmin;
 use Hcode\Model\User;
 
 //rota GET - Pagina de exibição de todos os usuários

@@ -1,6 +1,6 @@
 <?php
 
-use Hcode\Page;
+use Hcode\Pages\Page;
 use Hcode\Model\Category;
 
 

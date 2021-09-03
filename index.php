@@ -14,6 +14,8 @@ $app = new Slim();
 
 $app->config('debug', true);
 
+require_once('functions.php');
+
 //Inclusão dos arquivos de rotas do site
 require_once('routes'.DIRECTORY_SEPARATOR.'site'.DIRECTORY_SEPARATOR.'site.php');
 

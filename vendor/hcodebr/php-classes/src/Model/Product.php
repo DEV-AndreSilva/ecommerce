@@ -18,6 +18,25 @@ class Product extends Model
         return $sql->select("SELECT * FROM tb_products ORDER BY desproduct");
     }
 
+    /**
+     * Método resposável por criar a lista de produtos que preenchera as informações do site
+     *
+     * @param array $list
+     * @return array
+     */
+    public static function checkList($list)
+    {
+        //Adiciona a lista os caminhos das imagens dos produtos
+        foreach($list as &$row)
+        {
+            $p = new Product();
+            $p->setData($row);
+            $row= $p->getValues();
+        }
+     
+        return $list;
+    }
+
       /**
      * Método responsável pela busca de um produto do banco de dados, preenchendo id e URL do objeto produto
      *
@@ -93,7 +112,7 @@ class Product extends Model
         }
 
         //cria o atributo desphoto do produto
-        return $this->setdesurl($url);
+        return $this->setdesphoto($url);
     }
 
     public function getValues()

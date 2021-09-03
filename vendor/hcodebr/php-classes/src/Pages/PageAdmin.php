@@ -1,5 +1,5 @@
 <?php
-namespace Hcode;
+namespace Hcode\Pages;
 
 class PageAdmin extends Page
 {

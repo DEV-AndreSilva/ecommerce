@@ -1,6 +1,6 @@
 <?php
 
-namespace Hcode;
+namespace Hcode\Pages;
 use Rain\Tpl;
 
 class Page
@@ -18,7 +18,7 @@ class Page
      *
      * @param array $opts - Dados a ser renderizados
      */
-    public function __construct($opts= array(),$tpl_dir="/views/")
+    public function __construct($opts= array(),$tpl_dir="/views/site/")
     {
         //Mesclando array padrão com os parametros recebidos
         $this->options = array_merge($this->defaults, $opts);

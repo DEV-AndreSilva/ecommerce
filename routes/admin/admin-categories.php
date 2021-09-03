@@ -1,6 +1,6 @@
 <?php
 
-use Hcode\PageAdmin;
+use Hcode\Pages\PageAdmin;
 use Hcode\Model\User;
 use Hcode\Model\Category;
 
