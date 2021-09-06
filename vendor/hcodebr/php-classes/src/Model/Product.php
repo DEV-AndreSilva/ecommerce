@@ -170,4 +170,41 @@ class Product extends Model
         $this->checkPhoto();
 
     }
+
+    /**
+     * Método responsável pela busca de um produto pela sua URL
+     *
+     * @param string $desurl
+     * @return array
+     */
+    public function getFromUrl($desurl)
+    {
+        $sql = new Sql();
+
+        $row = $sql->select('SELECT * FROM tb_products WHERE desurl=:desurl LIMIT 1 ', [
+            ":desurl"=>$desurl
+        ]);
+
+    
+        $this->setData($row[0]);
+    }
+
+    /**
+     * Método responsável pela busca das categorias de um produto
+     *
+     * @return array
+     */
+    public function getCategories()
+    {
+        $sql = new Sql();
+
+        return $sql->select("SELECT * FROM tb_categories a 
+                                INNER JOIN tb_categoriesproducts b
+                                ON a.idcategory = b.idcategory
+                                WHERE b.idproduct=:idproduct", [
+                                    ":idproduct"=>$this->getidproduct()
+                                ]);
+    }
+
+
 }

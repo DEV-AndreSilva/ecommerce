@@ -26,8 +26,9 @@ require_once('routes'.DIRECTORY_SEPARATOR.'admin'.DIRECTORY_SEPARATOR.'admin-for
 require_once('routes'.DIRECTORY_SEPARATOR.'admin'.DIRECTORY_SEPARATOR.'admin-categories.php');
 require_once('routes'.DIRECTORY_SEPARATOR.'admin'.DIRECTORY_SEPARATOR.'admin-products.php');
 
-//Inclusão dos arquivos de rotas das categorias
+//Inclusão dos arquivos de rotas do Site
 require_once('routes'.DIRECTORY_SEPARATOR.'categories'.DIRECTORY_SEPARATOR.'categories.php');
+require_once('routes'.DIRECTORY_SEPARATOR.'products'.DIRECTORY_SEPARATOR.'products.php');
 
 
 //Executa a rota
