@@ -98,7 +98,7 @@ $app->post('/admin/categories/:idcategory',function($idcategory){
 
 });
 
-
+//Rota GET - Página de relação de produtos de uma categoria
 $app->get('/admin/categories/:idcategory/products', function($idcategory){
 
 	USER::verifyLogin();
@@ -118,7 +118,7 @@ $app->get('/admin/categories/:idcategory/products', function($idcategory){
 	]);
 });
 
-
+//Rota GET - Adiciona um produto da lista de não relacionados aos produtos relacionados a categoria
 $app->get('/admin/categories/:idcategory/products/:idproduct/add', function($idcategory, $idproduct){
 
 	USER::verifyLogin();
@@ -136,7 +136,7 @@ $app->get('/admin/categories/:idcategory/products/:idproduct/add', function($idc
 
 });
 
-
+//Rota GET - Remove um produto da lista de produtos relacionados a uma categoria especifica
 $app->get('/admin/categories/:idcategory/products/:idproduct/remove', function($idcategory,$idproduct){
 
 	USER::verifyLogin();

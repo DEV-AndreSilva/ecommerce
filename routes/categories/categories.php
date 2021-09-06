@@ -2,20 +2,24 @@
 
 use Hcode\Pages\Page;
 use Hcode\Model\Category;
-use Hcode\Model\Product;
 
-
+//Rota GET - Página de exibição de todos os produtos de uma categoria
 $app->get('/categories/:idcategory', function($idcategory){
 
-	//verificar login
+	$currentPage = (isset($_GET['page'])) ? (int)$_GET['page'] : 1;
 
 	$category = new Category();
-
 	$category->get((int)$idcategory);
+
+	$pagination = $category->getProductsPagination($currentPage);
+
 
 	$page = new Page();
 	$page->setTpl("category",[
 		"category"=>$category->getValues(),
-		"products"=>Product::checkList($category->getProducts())
+		"products"=>$pagination['pageData'],
+		"pages"=>$pagination['pages'],
+		"next"=>$pagination['next'],
+		"previous"=>$pagination['previous']
 	]);
 });

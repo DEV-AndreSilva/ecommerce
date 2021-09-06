@@ -91,6 +91,12 @@ class Category extends Model
     }
 
 
+    /**
+     * Método responsável por trazer todos os produtos de uma determinada categoria
+     *
+     * @param boolean $isProductsRelated
+     * @return array
+     */
     public function getProducts($isProductsRelated=true)
     {
         $sql= new sql();
@@ -115,6 +121,12 @@ class Category extends Model
         }
     }
 
+    /**
+     * Método responsável por adicionar uma relação entre produto e categoria no banco de dados
+     *
+     * @param Product $product
+     * @return void
+     */
     public function addProduct(Product $product)
     {
         $sql = new Sql();
@@ -124,6 +136,12 @@ class Category extends Model
         ));
     }
 
+    /**
+     * Método resposável por remover a relação entre produto e categoria no banco de dados
+     *
+     * @param Product $product
+     * @return void
+     */
     public function removeProduct(Product $product)
     {
         $sql = new Sql();
@@ -132,5 +150,101 @@ class Category extends Model
             ":idproduct"=>$product->getidproduct()
         ));
     }
+
+    /**
+     * Método responsável por gerenciar a paginação
+     *
+     * @param integer $currentPage
+     * @param integer $itemsPerPage
+     * @return array 
+     */
+    public function getProductsPagination($currentPage=1,$itemsPerPage=8)
+    {
+
+        $start = ($currentPage-1)* $itemsPerPage;
+        $sql = new sql();
+
+        $results = $sql->select("SELECT SQL_CALC_FOUND_ROWS *
+                     FROM tb_products a
+                     INNER JOIN tb_categoriesproducts b ON a.idproduct = b.idproduct
+                     INNER JOIN tb_categories c ON c.idcategory = b.idcategory
+                     WHERE c.idcategory = :idcategory
+                     LIMIT $start,$itemsPerPage;", [
+                         ":idcategory"=>$this->getidcategory()
+                     ]);
+
+        $resultTotal=$sql->select("SELECT FOUND_ROWS() AS nrtotal;");
+
+        $data = [
+            "pageData"=>Product::checkList($results),
+           //'totalProducts'=>(int)$resultTotal[0]['nrtotal'],
+            'totalPages'=>ceil($resultTotal[0]['nrtotal']/$itemsPerPage),
+        ];
+
+        $data["pages"]=$this->getPages($data['totalPages']);
+    
+        $values= $this->getNextAndPreviousPage($currentPage,$data['totalPages']);
+        $data["next"]=$values['next'];
+        $data["previous"]=$values['previous'];
+
+        return $data;
+    }
+
+    /**
+     * Método responsável por construir os links de next e previous page
+     *
+     * @param integer $currentPage
+     * @param integer $totalPages
+     * @return array
+     */
+    public function getNextAndPreviousPage(int $currentPage, int $totalPages)
+    {
+        $next ='/categories/'.$this->getidcategory()."?page=".( $currentPage +1);
+        $previous='/categories/'.$this->getidcategory()."?page=".($currentPage -1);
+
+        //verifica se é a ultima página
+        if($currentPage==$totalPages)
+        {
+            $next ='/categories/'.$this->getidcategory()."?page=".($currentPage);
+        }
+
+        //Verifica se é a primeira página
+        if($currentPage==1)
+        {
+            $previous='/categories/'.$this->getidcategory()."?page=".($currentPage);
+        }
+
+        if($totalPages==0)
+        {
+            $next ='/categories/'.$this->getidcategory()."#";
+            $previous='/categories/'.$this->getidcategory()."#";       
+        }
+        
+        return ["next"=>$next, "previous"=>$previous];
+
+    }
+
+    /**
+     * Método responsavel por construir os links das páginas
+     *
+     * @param integer $totalPages
+     * @return void
+     */
+    public function getPages(int $totalPages)
+    {
+            
+        $pages = [];
+        for($i=1; $i<=$totalPages;$i++)
+        {
+            array_push($pages, [
+                'link'=>'/categories/'.$this->getidcategory()."?page=".$i,
+                'page'=>$i
+
+            ]);
+        }
+        return $pages;
+    }
+
+
 
 }
