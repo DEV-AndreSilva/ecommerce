@@ -16,6 +16,64 @@ class User extends Model
 	const ERROR_REGISTER = "UserErrorRegister";
 	const SUCCESS = "UserSucesss";
 
+
+    /**
+     * Método responsável por retornar os dados do usuário pela sessão
+     *
+     * @return User
+     */
+    public static function getFromSession()
+    {
+        $user = new User();
+
+        //Verifica se a sessão está ativa e o id do usuário está nela
+        if(isset($_SESSION[User::SESSION]) && (int) $_SESSION[User::SESSION]["iduser"]>0)
+        {
+            $user->setData($_SESSION[User::SESSION]);
+        }
+
+        return $user;
+    }
+
+    /**
+     * método responsável por verificar se o usuário está logado
+     *
+     * @param boolean $inadmin
+     * @return void
+     */
+    public static function checkLogin($inadmin=true)
+    {
+  
+        if( !isset($_SESSION[user::SESSION]) ||                      //Se a sessão existe
+            !$_SESSION[user::SESSION] ||                             //Se a sessão não está vazia ou é nula
+            !(int)$_SESSION[user::SESSION]['iduser']>0)              //Se há um id de usuário nessa sessão
+           {
+            //Não está Logado
+            return false;
+           }
+
+        else //Está logado
+        {
+            //Verifica se é uma rota da administraçao, se a sessão contem os dados de um administrador
+            if($inadmin===true && (bool)$_SESSION[User::SESSION]['inadmin']===true)
+            {
+                return true;
+            }
+
+            //Está logado mas não é um administrador
+            else if($inadmin===false)
+            {
+                return true;
+            }
+
+            //Não está logado
+            else
+            {
+                return false;
+            }
+        }
+    }
+
     /**
      * Método responsável por realizar o Login do usuário
      * @param string $login - Login do usuário
@@ -67,10 +125,7 @@ class User extends Model
     public static function verifyLogin($inadmin=true)
     {
         //Verificação de administrador
-        if(!isset($_SESSION[user::SESSION]) ||                      //Se a sessão existe
-           !$_SESSION[user::SESSION] ||                             //Se a sessão não está vazia ou é nula
-           !(int)$_SESSION[user::SESSION]['iduser']>0 ||            //Se não existe um id de usuário
-           (bool)$_SESSION[User::SESSION]['inadmin'] !== $inadmin)  //Se o usuário é um administrador
+        if(!User::checkLogin($inadmin))
         {
             header("Location: /admin/login");
             exit;

@@ -1,6 +1,7 @@
 <?php
 
-use Hcode\Model\Product;
+use \Hcode\Model\Cart;
+use \Hcode\Model\Product;
 use \Hcode\Pages\Page;
 
 //rota GET - Pagina inicial ou index
@@ -13,4 +14,14 @@ $app->get('/', function()
 	$page->setTpl("site/index",[
 		"products"=>Product::checkList($products)]);
 
+});
+
+//rota Get - Página do carrinho
+$app->get('/cart', function(){
+
+	$cart= Cart::getFromSession();
+
+	$page = new Page();
+
+	$page->setTpl("cart");
 });

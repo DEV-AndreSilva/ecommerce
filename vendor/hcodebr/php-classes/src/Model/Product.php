@@ -100,7 +100,7 @@ class Product extends Model
         //URL padrão
         $url= "/resources/site/img/products/product.jpg";
 
-        //Se a imagem existir mudo o  URL para o caminho da imagem
+        //Se a imagem existir mudo a URL para o caminho da imagem
         if(file_exists($_SERVER['DOCUMENT_ROOT'].DIRECTORY_SEPARATOR.
         "resources".DIRECTORY_SEPARATOR.
         "site".DIRECTORY_SEPARATOR.
@@ -115,6 +115,11 @@ class Product extends Model
         return $this->setdesphoto($url);
     }
 
+    /**
+     * Método responsável por retornar os atributos do objeto produto com o caminho da foto
+     *
+     * @return array
+     */
     public function getValues()
     {
         $this->checkPhoto();
