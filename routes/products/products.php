@@ -1,6 +1,6 @@
 <?php
-use Hcode\Model\Product;
-use Hcode\Pages\Page;
+use \Hcode\Model\Product;
+use \Hcode\Pages\Page;
 
 
 //Rota  GET - Página de detalhes do Produto

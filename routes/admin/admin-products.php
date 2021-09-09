@@ -1,8 +1,8 @@
 <?php
 
-use Hcode\Pages\PageAdmin;
-use Hcode\Model\Product;
-use Hcode\Model\User;
+use \Hcode\Pages\PageAdmin;
+use \Hcode\Model\Product;
+use \Hcode\Model\User;
 
 
 //Rota GET - Página de visualização de todos os produtos 

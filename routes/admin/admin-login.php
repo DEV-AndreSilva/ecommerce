@@ -1,7 +1,7 @@
 <?php
 
-use Hcode\Model\User;
-use Hcode\Pages\PageAdmin;
+use \Hcode\Model\User;
+use \Hcode\Pages\PageAdmin;
 
 //rota GET - Painel de administração
 $app->get('/admin',function()

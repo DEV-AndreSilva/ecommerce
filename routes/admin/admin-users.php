@@ -1,7 +1,7 @@
 <?php
 
-use Hcode\Pages\PageAdmin;
-use Hcode\Model\User;
+use \Hcode\Pages\PageAdmin;
+use \Hcode\Model\User;
 
 //rota GET - Pagina de exibição de todos os usuários
 $app->get('/admin/users', function()

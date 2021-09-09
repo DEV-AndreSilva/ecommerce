@@ -1,7 +1,7 @@
 <?php
 
-use Hcode\Pages\Page;
-use Hcode\Model\Category;
+use \Hcode\Pages\Page;
+use \Hcode\Model\Category;
 
 //Rota GET - Página de exibição de todos os produtos de uma categoria
 $app->get('/categories/:idcategory', function($idcategory){

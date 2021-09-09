@@ -1,9 +1,9 @@
 <?php
 
-use Hcode\Pages\PageAdmin;
-use Hcode\Model\User;
-use Hcode\Model\Category;
-use Hcode\Model\Product;
+use \Hcode\Pages\PageAdmin;
+use \Hcode\Model\User;
+use \Hcode\Model\Category;
+use \Hcode\Model\Product;
 
 //Rota GET - Página de exibição das categorias
 $app->get('/admin/categories',function(){

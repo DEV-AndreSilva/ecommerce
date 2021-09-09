@@ -1,7 +1,7 @@
 <?php
 
-use Hcode\Model\User;
-use Hcode\Pages\PageAdmin;
+use \Hcode\Model\User;
+use \Hcode\Pages\PageAdmin;
 
 //Rota GET - Pagina de esqueci a senha
 $app->get('/admin/forgot', function(){
