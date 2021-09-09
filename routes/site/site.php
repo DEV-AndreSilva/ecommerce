@@ -1,8 +1,8 @@
 <?php
 
-use Hcode\Model\Cart;
-use Hcode\Model\Product;
-use Hcode\Pages\Page;
+use \Hcode\Model\Cart;
+use \Hcode\Model\Product;
+use \Hcode\Pages\Page;
 
 //rota GET - Pagina inicial ou index
 $app->get('/', function() 
@@ -26,7 +26,8 @@ $app->get('/cart', function(){
 
 	$page->setTpl("cart",[
 		'cart'=>$cart->getValues(),
-		'products'=>$cart->getProducts()
+		'products'=>$cart->getProducts(),
+		'error'=>Cart::getMsgError()
 	]);
 });
 
@@ -83,6 +84,19 @@ $app->get("/cart/:idproduct/remove", function($idProduct){
 	$cart->removeProduct($product,true);
 
 	header("Location: /cart");
+	exit;
+
+});
+
+$app->post("/cart/freight", function(){
+
+	$cart = Cart::getFromSession();
+
+	$cart->setFreight($_POST['zipcode']);
+
+	$cart->getCalculateTotal();
+
+	header("location: /cart");
 	exit;
 
 });

@@ -1,12 +1,13 @@
 <?php
 namespace Hcode\Model;
 
-use Hcode\DB\Sql;
-use Hcode\Model\Product;
+use \Hcode\DB\Sql;
+use \Hcode\Model\Product;
 
 class Cart extends Model
 {
     const SESSION = "Cart";
+    const SESSION_ERROR="CartError";
 
     /**
      * Método responsável por recuperar os dados do carrinho pelos dados de uma sessão
@@ -53,9 +54,6 @@ class Cart extends Model
 
                 //Instancia uma sessão com os dados objeto carrinho
                 $cart->setToSession();
-
-                var_dump($cart);
-                exit;
             }
         }
 
@@ -176,6 +174,11 @@ class Cart extends Model
         ":idproduct"=>$product->getidproduct()
         ]);
 
+        if( ($this->getMsgError())!=null)
+        {
+            $this->clearMsgError();
+        }
+        //$this->getCalculateTotal();
       
     }
 
@@ -209,7 +212,189 @@ class Cart extends Model
                 ":idproduct"=>$product->getidproduct()
             ]);
         }
+
+        if( ($this->getMsgError())!=null)
+        {
+            $this->clearMsgError();
+        }
+
+       // $this->getCalculateTotal();
     }
+
+    public function getProductsTotals()
+    {
+        $sql= new Sql();
+
+        $results = $sql->select(
+       "SELECT SUM(a.vlprice) AS vlprice, SUM(a.vlwidth) AS vlwidth, SUM(a.vlheight) AS vlheight, SUM(a.vllength) AS vllength, SUM(a.vlweight) AS vlweight, COUNT(*) AS nrqtd
+        FROM tb_products a 
+        INNER JOIN tb_cartsproducts b ON a.idproduct=b.idproduct
+        WHERE b.idcart = :idcart AND b.dtremoved IS NULL ",
+        [
+            ":idcart"=>$this->getidcart()
+        ]);
+
+        if($results[0]['vlprice'] != null)
+        {
+            return $results[0];            
+        }
+        else
+        {
+            return [
+                'vllength'=> 0,
+                'vlprice' => 0,
+                'vlwidth' => 0,
+                'vlheight' => 0,
+                'vlweight' => 0,
+                'nrqtd' => 0
+            ];
+        }
+
+    }
+
+    /**
+     * Método responsável pela consulta do web service do correio e calculo do frete
+     *
+     * @param string $nrzipcode
+     * @return void
+     */
+    public function setFreight(string $nrzipcode)
+    {
+        $nrzipcode =  str_replace("-","", $nrzipcode);
+        $total = $this->getProductsTotals();
+        {
+            $total['vllength'] = ($total['vllength'] >15 && $total['vllength']<100) ? $total['vllength'] : 50;
+            $total['vlheight'] = ($total['vlheight']>1 && $total['vlheight']<100) ? $total['vlheight'] : 50;
+            $total['vlwidth'] = ($total['vlwidth']>10 && $total['vlwidth']<100) ? $total['vlwidth']: 50;
+        
+            $qs = http_build_query([
+            "nCdEmpresa"=>"",
+            "sDsSenha"=>"",
+            "nCdServico"=>"40010",
+            "sCepOrigem"=> '15440000',
+            "sCepDestino"=>$nrzipcode,
+            "nVlPeso"=>$total['vlweight'],
+            "nCdFormato"=>"1",
+            "nVlComprimento"=>$total['vllength'],
+            "nVlAltura"=>$total['vlheight'],
+            "nVlLargura"=>$total['vlwidth'],
+            "nVlDiametro"=>0.0,
+            "sCdMaoPropria"=>"S",
+            "nVlValorDeclarado"=>$total['vlprice'],
+            "sCdAvisoRecebimento"=>"S"
+            ]);
+
+            //função para ler xml
+            $xml = simplexml_load_file("http://ws.correios.com.br/calculador/CalcPrecoPrazo.asmx/CalcPrecoPrazo?".$qs);
+                
+            $result = $xml->Servicos->cServico;
+             
+            if($result->MsgErro != "")
+            {
+                Cart::setMsgError((string)$result->MsgErro);
+                                
+            }
+            else
+            {
+                Cart::clearMsgError();
+            }
+                    
+            $this->setnrdays($result->PrazoEntrega);
+            $this->setvlfreight(CART::formatValueToDecimal($result->Valor));
+            $this->setdeszipcode($nrzipcode);
+                    
+            $this->save();
+            return $result;
+         
+        }
+        
+    }
+
+    
+    /**
+     * Método responsável por retornar o valor ao formato decimal
+     *
+     * @param $value
+     * @return void
+     */
+    public static function formatValuetoDecimal($value):float
+    {
+        $value = str_replace(".","",$value);
+        $value = str_replace(",",".",$value);
+
+        return $value;
+    }
+
+    /**
+     * Método responsável por definir a mensagem de erro
+     *
+     * @param string $message
+     * @return void
+     */
+    public static function setMsgError($message)
+    {
+        $_SESSION[Cart::SESSION_ERROR]= $message;
+    }
+
+    /**
+     * Método responsável por retornar a mensagem de erro
+     *
+     * @return void
+     */
+    public static function getMsgError()
+    {
+        return isset($_SESSION[Cart::SESSION_ERROR]) ? $_SESSION[Cart::SESSION_ERROR] : null;
+    }
+
+    /**
+     * Método responsável por limpar o valor da mensagem de erro
+     *
+     * @return void
+     */
+    public static function clearMsgError()
+    {
+        $_SESSION[Cart::SESSION_ERROR]= null;
+    }
+
+    /**
+     * Método responsável por atualizar o valor do frete
+     *
+     * @return void
+     */
+    public function updateFreight()
+    {
+        if($this->getdeszipcode() != null &&  $this->getdeszipcode() != '')
+        {
+           $this->setFreight($this->getdeszipcode()); 
+        }
+    }
+    
+    /**
+     * Método responsável por retornar os valores da compra com total e subtotal
+     *
+     * @return void
+     */
+    public function getValues()
+    {
+        $this->getCalculateTotal();
+
+        return parent::getValues();
+    }
+
+    /**
+     * Método responsavél por calcular os valores de total e subtotal da compra
+     *
+     * @return void
+     */
+    public function getCalculateTotal()
+    {
+        //$this->updateFreight();
+        $totals = $this->getProductsTotals();
+        $this->setvlsubtotal($totals['vlprice']);
+        $this->setvltotal($totals['vlprice']+ $this->getvlfreight());
+
+    }
+
 
  
 }

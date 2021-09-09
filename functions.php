@@ -6,7 +6,7 @@
  * @param float $price
  * @return float
  */
-function formatPrice(float $price)
+function formatPrice($price)
 {
     return number_format($price, 2, ",",".");
 }
