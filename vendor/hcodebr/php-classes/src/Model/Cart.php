@@ -2,7 +2,7 @@
 namespace Hcode\Model;
 
 use Hcode\DB\Sql;
-use \Hcode\Model\Product;
+use Hcode\Model\Product;
 
 class Cart extends Model
 {
@@ -13,7 +13,7 @@ class Cart extends Model
      *
      * @return void
      */
-    public static function getFromSession()
+    public static function getFromSession():Cart
     {
         $cart = new Cart();
 
@@ -53,6 +53,9 @@ class Cart extends Model
 
                 //Instancia uma sessão com os dados objeto carrinho
                 $cart->setToSession();
+
+                var_dump($cart);
+                exit;
             }
         }
 
@@ -98,7 +101,7 @@ class Cart extends Model
     public function getFromSessionID()
     {
     
-         $sql = new Sql();
+        $sql = new Sql();
     
         $results= $sql->select("SELECT * FROM tb_carts WHERE dessessionid = :dessessionid", [
             ":dessessionid"=>session_id()
@@ -131,6 +134,81 @@ class Cart extends Model
         ]);
 
         $this->setData($result[0]);
+    }
+
+    /**
+     * Método responsável por retornar todos os produtos de um carrinho
+     *
+     * @return void
+     */
+    public function getProducts()
+    {
+        $sql = new Sql();
+
+        $rows = $sql->select(
+            "SELECT b.idproduct, b.desproduct, b.vlprice, b.vlwidth, b.vlheight, b.vllength, b.vlweight, b.desurl,
+            COUNT(*) AS nrqtd,
+            SUM(b.vlprice) AS vltotal
+            FROM tb_cartsproducts a
+            INNER JOIN tb_products b ON a.idproduct = b.idproduct
+            WHERE a.idcart = :idcart 
+            AND a.dtremoved IS NULL
+            GROUP BY b.idproduct
+            ORDER BY b.desproduct",
+             [
+                 ":idcart"=>$this->getidcart()
+             ]);
+
+        return Product::checkList($rows);
+    }
+
+    /**
+     * Método responsável por adicionar um produto a um carrinho
+     *
+     * @param Product $product
+     * @return void
+     */
+    public function addProduct(Product $product)
+    {
+        $sql= new sql();
+        $sql->query('INSERT INTO tb_cartsproducts(idcart,idproduct) VALUES(:idcart, :idproduct)',[
+        ":idcart"=>$this->getidcart(),
+        ":idproduct"=>$product->getidproduct()
+        ]);
+
+      
+    }
+
+    /**
+     * Método responsável por remover 1 ou todos os produtos de um carrinho
+     *
+     * @param Product $product
+     * @param boolean $all
+     * @return void
+     */
+    public function removeProduct(Product $product, $all = false)
+    {
+        $sql = new Sql();
+
+        if($all) //Remove todos os produtos daquele tipo
+        {
+            $sql->query("UPDATE tb_cartsproducts SET dtremoved = NOW() WHERE idcart=:idcart  AND idproduct=:idproduct AND dtremoved IS NULL",
+            [
+                ":idcart"=>$this->getidcart(),
+                ":idproduct"=>$product->getidproduct()
+            ]);
+        }
+        else //Remove 1 daquele tipo de produto
+        {
+            $sql->query("UPDATE tb_cartsproducts SET dtremoved = NOW() WHERE idcart=:idcart
+            AND idproduct=:idproduct
+            AND dtremoved IS NULL
+            LIMIT 1",
+            [
+                ":idcart"=>$this->getidcart(),
+                ":idproduct"=>$product->getidproduct()
+            ]);
+        }
     }
 
  
