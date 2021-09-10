@@ -2,6 +2,7 @@
 
 use \Hcode\Pages\Page;
 use \Hcode\Model\Category;
+use \Hcode\Model\Cart;
 
 //Rota GET - Página de exibição de todos os produtos de uma categoria
 $app->get('/categories/:idcategory', function($idcategory){
@@ -12,9 +13,13 @@ $app->get('/categories/:idcategory', function($idcategory){
 	$category->get((int)$idcategory);
 
 	$pagination = $category->getProductsPagination($currentPage);
+	
+    $cart= Cart::getFromSession();
 
+	$totalCart=$cart->getCalculateTotal();
 
-	$page = new Page();
+	$page = new Page(['data'=>["vlprice"=>$totalCart['vlprice'], "nrqtd"=>$totalCart['nrqtd']]]);
+
 	$page->setTpl("category",[
 		"category"=>$category->getValues(),
 		"products"=>$pagination['pageData'],

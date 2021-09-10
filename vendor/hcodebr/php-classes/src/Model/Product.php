@@ -50,7 +50,11 @@ class Product extends Model
         array(
             ":idproduct"=>$idproduct
         ));
-        $this->setData($results[0]);
+
+        if(count($results)>0)
+        {
+            $this->setData($results[0]);
+        }
     }
 
 
@@ -74,7 +78,11 @@ class Product extends Model
             ":desurl"=>$this->getdesurl()
         ));
 
-        $this->setData($results[0]);
+        if(count($results)>0)
+        {
+            $this->setData($results[0]);
+        }
+        
     }
 
     /**

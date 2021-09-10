@@ -1,8 +1,10 @@
 <?php
 
+use \Hcode\Model\Address;
 use \Hcode\Model\Cart;
 use \Hcode\Model\Product;
 use \Hcode\Pages\Page;
+use \Hcode\Model\User;
 
 //rota GET - Pagina inicial ou index
 $app->get('/', function() 
@@ -10,7 +12,12 @@ $app->get('/', function()
 	//Mostrar todos os produtos na tela inicial da loja
 	$products = Product::listAll();
 	
-	$page = new Page();
+	$cart= Cart::getFromSession();
+
+	$totalCart=$cart->getCalculateTotal();
+
+	$page = new Page(['data'=>["vlprice"=>$totalCart['vlprice'], "nrqtd"=>$totalCart['nrqtd']]]);
+
 	$page->setTpl("site/index",[
 		"products"=>Product::checkList($products)]);
 
@@ -22,8 +29,10 @@ $app->get('/cart', function(){
 
 	$cart= Cart::getFromSession();
 
-	$page = new Page();
+	$totalCart=$cart->getCalculateTotal();
 
+	$page = new Page(['data'=>["vlprice"=>$totalCart['vlprice'], "nrqtd"=>$totalCart['nrqtd']]]);
+	
 	$page->setTpl("cart",[
 		'cart'=>$cart->getValues(),
 		'products'=>$cart->getProducts(),
@@ -34,7 +43,6 @@ $app->get('/cart', function(){
 //rota GET - Adição de produtos ao carrinho
 $app->get("/cart/:idproduct/add", function($idProduct){
 
-	$cart = new Cart();
 	$product = new Product();
 
 	$product->get((int)$idProduct);
@@ -47,8 +55,7 @@ $app->get("/cart/:idproduct/add", function($idProduct){
 	{
 		$cart->addProduct($product);
 	}
-	
-	//var_dump((int)$cart->getidcart());
+
 	header("Location: /cart");
 	exit;
 
@@ -57,7 +64,6 @@ $app->get("/cart/:idproduct/add", function($idProduct){
 //rota GET - Remoção de 1 unidade de produto do carrinho
 $app->get("/cart/:idproduct/minus", function($idProduct){
 
-	$cart = new Cart();
 	$product = new Product();
 
 	$product->get((int)$idProduct);
@@ -88,6 +94,7 @@ $app->get("/cart/:idproduct/remove", function($idProduct){
 
 });
 
+//Rota POST - Calculo do frete
 $app->post("/cart/freight", function(){
 
 	$cart = Cart::getFromSession();
@@ -99,4 +106,21 @@ $app->post("/cart/freight", function(){
 	header("location: /cart");
 	exit;
 
+});
+
+$app->get("/checkout", function(){
+
+	User::verifyLogin(false);
+	
+	$address= new Address();
+	$cart =  Cart::getFromSession();
+
+	$totalCart=$cart->getCalculateTotal();
+
+	$page = new Page(['data'=>["vlprice"=>$totalCart['vlprice'], "nrqtd"=>$totalCart['nrqtd']]]);
+
+	$page->setTpl("checkout",[
+		'cart'=>$cart->getValues(),
+		'address'=>$address->getValues()
+	]);
 });

@@ -12,7 +12,7 @@ class Cart extends Model
     /**
      * Método responsável por recuperar os dados do carrinho pelos dados de uma sessão
      *
-     * @return void
+     * @return Cart
      */
     public static function getFromSession():Cart
     {
@@ -36,12 +36,10 @@ class Cart extends Model
                     "dessessionid"=>session_id()
                 ];
 
-                //Recebe os dados de um usuário pela sessão caso ela exista
-                $user= User::getFromSession();
-
                 //Verifica o Login do usuário
-                if($user::checkLogin(false)==true)
+                if(User::checkLogin(false)==true)
                 {
+                    //Recebe os dados de um usuário pela sessão caso ela exista
                     $user= User::getFromSession();
                     $data['iduser']= $user->getiduser();
                 }
@@ -80,11 +78,10 @@ class Cart extends Model
     public function get(int $idcart)
     {
         $sql = new Sql();
-
         $results= $sql->select("SELECT * FROM tb_carts WHERE idcart = :idcart", [
-            ":idcart"=>$idcart
+            ":idcart"=>(int)$idcart
         ]);
-
+ 
         if(count($results)>0)
         {
             $this->setData($results[0]);
@@ -98,7 +95,6 @@ class Cart extends Model
      */
     public function getFromSessionID()
     {
-    
         $sql = new Sql();
     
         $results= $sql->select("SELECT * FROM tb_carts WHERE dessessionid = :dessessionid", [
@@ -131,7 +127,10 @@ class Cart extends Model
             ":pnrdays"=>$this->getnrdays(),
         ]);
 
-        $this->setData($result[0]);
+        if(count($result)>0)
+        {
+            $this->setData($result[0]);
+        }
     }
 
     /**
@@ -168,6 +167,9 @@ class Cart extends Model
      */
     public function addProduct(Product $product)
     {
+         //Zera o valor do frete para que o usuário faça outra busca quando modificar o carrinho
+         $this->setvlfreight(0);
+
         $sql= new sql();
         $sql->query('INSERT INTO tb_cartsproducts(idcart,idproduct) VALUES(:idcart, :idproduct)',[
         ":idcart"=>$this->getidcart(),
@@ -178,8 +180,7 @@ class Cart extends Model
         {
             $this->clearMsgError();
         }
-        //$this->getCalculateTotal();
-      
+
     }
 
     /**
@@ -217,10 +218,13 @@ class Cart extends Model
         {
             $this->clearMsgError();
         }
-
-       // $this->getCalculateTotal();
     }
 
+    /**
+     * Método responsável por preencher os dados do total de uma compra(soma dos atributos dos objetos do carrinho)
+     *
+     * @return array
+     */
     public function getProductsTotals()
     {
         $sql= new Sql();
@@ -256,17 +260,23 @@ class Cart extends Model
      * Método responsável pela consulta do web service do correio e calculo do frete
      *
      * @param string $nrzipcode
-     * @return void
+     * @return array
      */
     public function setFreight(string $nrzipcode)
     {
         $nrzipcode =  str_replace("-","", $nrzipcode);
+
         $total = $this->getProductsTotals();
+
+        //Se a quantidade de produtos do carrinho é maior que 0
+        if($total['nrqtd']>0)
         {
-            $total['vllength'] = ($total['vllength'] >15 && $total['vllength']<100) ? $total['vllength'] : 50;
-            $total['vlheight'] = ($total['vlheight']>1 && $total['vlheight']<100) ? $total['vlheight'] : 50;
-            $total['vlwidth'] = ($total['vlwidth']>10 && $total['vlwidth']<100) ? $total['vlwidth']: 50;
+            //Tamanho minimo e máximo dos envios pelo pacote
+            $total['vllength'] = ($total['vllength'] >15 && $total['vllength']<100) ? $total['vllength'] : 16;
+            $total['vlheight'] = ($total['vlheight']>1 && $total['vlheight']<100) ? $total['vlheight'] : 2;
+            $total['vlwidth'] = ($total['vlwidth']>10 && $total['vlwidth']<100) ? $total['vlwidth']: 11;
         
+            //parametros de consulta do webservice do correios
             $qs = http_build_query([
             "nCdEmpresa"=>"",
             "sDsSenha"=>"",
@@ -284,25 +294,27 @@ class Cart extends Model
             "sCdAvisoRecebimento"=>"S"
             ]);
 
-            //função para ler xml
+            //função para ler xml com link do webservice
             $xml = simplexml_load_file("http://ws.correios.com.br/calculador/CalcPrecoPrazo.asmx/CalcPrecoPrazo?".$qs);
                 
             $result = $xml->Servicos->cServico;
              
+            //Se a consulta ao web service retornar um erro 
             if($result->MsgErro != "")
             {
-                Cart::setMsgError((string)$result->MsgErro);
-                                
+                Cart::setMsgError((string)$result->MsgErro);               
             }
             else
             {
                 Cart::clearMsgError();
             }
                     
+            //Prazo de entrega e valor do frete
             $this->setnrdays($result->PrazoEntrega);
             $this->setvlfreight(CART::formatValueToDecimal($result->Valor));
             $this->setdeszipcode($nrzipcode);
                     
+            //Atualização do carrinho no banco de dados
             $this->save();
             return $result;
          
@@ -377,7 +389,6 @@ class Cart extends Model
     public function getValues()
     {
         $this->getCalculateTotal();
-
         return parent::getValues();
     }
 
@@ -393,6 +404,7 @@ class Cart extends Model
         $this->setvlsubtotal($totals['vlprice']);
         $this->setvltotal($totals['vlprice']+ $this->getvlfreight());
 
+        return $totals;
     }
 
 

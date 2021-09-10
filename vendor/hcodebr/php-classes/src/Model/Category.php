@@ -33,7 +33,10 @@ class Category extends Model
             ":descategory"=>$this->getdescategory()
             ));
 
-            $this->setData($result[0]);
+            if(count($result)>0)
+            {
+                $this->setData($result[0]);
+            }
 
             Category::updateFile();
     }
@@ -52,8 +55,10 @@ class Category extends Model
             ":idcategory"=>$idCategory
         ));
 
-        $this->setData($result[0]);
-
+        if(count($result)>0)
+        {
+            $this->setData($result[0]);
+        }
     }
 
     /**
@@ -158,7 +163,7 @@ class Category extends Model
      * @param integer $itemsPerPage
      * @return array 
      */
-    public function getProductsPagination($currentPage=1,$itemsPerPage=8)
+    public function getProductsPagination($currentPage=1,$itemsPerPage=2)
     {
 
         $start = ($currentPage-1)* $itemsPerPage;

@@ -85,7 +85,27 @@
                 
                 <div class="col-sm-6">
                     <div class="shopping-item">
-                        <a href="/cart">Carrinho - <span class="cart-amunt">R$100</span> <i class="fa fa-shopping-cart"></i> <span class="product-count">5</span></a>
+                        <a href="/cart">Carrinho - <span class="cart-amunt">
+                            R$  {if="isset($vlprice)"} 
+                                    {if="($vlprice) != null && $vlprice !='' "}
+                                        {function="formatPrice($vlprice)"}
+                                    {else}
+                                    0,00
+                                    {/if}
+                                {else}
+                                0,00 
+                                {/if}
+                                </span> <i class="fa fa-shopping-cart"></i> <span class="product-count">
+                                {if="isset($nrqtd)"} 
+                                    {if="($nrqtd) != null && $nrqtd !='' "}
+                                        {$nrqtd}
+                                    {else}
+                                     0
+                                    {/if} 
+                                {else}
+                                 0
+                                {/if}
+                                </span></a>
                     </div>
                 </div>
             </div>

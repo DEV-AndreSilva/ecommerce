@@ -67,8 +67,8 @@ CREATE TABLE `db_ecommerce`.`tb_addresses` (
 DROP TABLE IF EXISTS `db_ecommerce`.`tb_carts`;
 
 CREATE TABLE `db_ecommerce`.`tb_carts` (
-  `idcart` int(11) NOT NULL,
-  `dessessionid` varchar(64) NOT NULL,
+  `idcart` int(11) NOT NULL AUTO_INCREMENT,
+  `dessessionid` varchar(64) NOT NULL,  
   `iduser` int(11) DEFAULT NULL,
   `idaddress` int(11) DEFAULT NULL,
   `vlfreight` decimal(10,2) DEFAULT NULL,
