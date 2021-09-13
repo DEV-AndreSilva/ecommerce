@@ -108,10 +108,11 @@ $app->post("/cart/freight", function(){
 
 });
 
+//Rota GET - Checkout de usuário logado para fazer a compra
 $app->get("/checkout", function(){
 
 	User::verifyLogin(false);
-	
+
 	$address= new Address();
 	$cart =  Cart::getFromSession();
 
@@ -123,4 +124,44 @@ $app->get("/checkout", function(){
 		'cart'=>$cart->getValues(),
 		'address'=>$address->getValues()
 	]);
+});
+
+
+
+//Rota GET - Página de Login
+$app->get("/login", function(){
+	
+	USER::verifyLogout();
+	$page = new Page();
+
+	$page->setTpl("login",[
+		'error'=>User::getError( $_SESSION[User::ERROR]),
+		'error_register'=>""
+	]);
+});
+
+//Rota Post Login do usuário
+$app->post("/login", function()
+{
+	try
+	{
+		$user = User::login($_POST['login'],$_POST['password']);
+		header("Location: /checkout");
+		exit;
+	}
+	catch(Exception $ex)
+	{
+		User::setError($_SESSION[User::ERROR] , $ex->getMessage());
+		header("Location: /login");
+		exit;
+	}
+
+});
+
+//rota GET - Realizar logout usuário
+$app->get('/logout', function()
+{
+	User::logout();
+	header("Location: /login");
+	exit;
 });

@@ -15,6 +15,8 @@ $app->get('/admin',function()
 //rota GET - Página de login
 $app->get('/admin/login',function()
 {
+	User::verifyLogout();
+
 	$page= new PageAdmin([
 		'header'=>false,
 		'footer'=>false

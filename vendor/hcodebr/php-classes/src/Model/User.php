@@ -39,7 +39,7 @@ class User extends Model
      * método responsável por verificar se o usuário está logado
      *
      * @param boolean $inadmin
-     * @return void
+     * @return bool
      */
     public static function checkLogin($inadmin=true)
     {
@@ -49,27 +49,28 @@ class User extends Model
             !(int)$_SESSION[user::SESSION]['iduser']>0)              //Se há um id de usuário nessa sessão
            {
             //Não está Logado
-            return false;
+            return true;
            }
 
         else //Está logado
         {
+            
             //Verifica se é uma rota da administraçao, se a sessão contem os dados de um administrador
             if($inadmin===true && (bool)$_SESSION[User::SESSION]['inadmin']===true)
             {
-                return true;
+                return false;
             }
 
             //Está logado mas não é um administrador
             else if($inadmin===false)
             {
-                return true;
+                return false;
             }
 
             //Não está logado
             else
             {
-                return false;
+                return true;
             }
         }
     }
@@ -78,14 +79,16 @@ class User extends Model
      * Método responsável por realizar o Login do usuário
      * @param string $login - Login do usuário
      * @param string $password - Senha do usuário
-     * @return void
+     * @return mixed
      */
     public static function login($login, $password)
-    {
+    {   
+
+     
         $sql=new Sql();
 
         //Procura o usuário na base de dados
-        $result= $sql->select("SELECT * FROM tb_users WHERE deslogin = :login", array(
+        $result= $sql->select("SELECT * FROM tb_users a INNER JOIN tb_persons b ON a.idperson = b.idperson WHERE a.deslogin = :login", array(
             ":login"=>$login
         ));
 
@@ -97,13 +100,20 @@ class User extends Model
 
         //Guarda os dados do usuário encontrado
         $data= $result[0];
+       
+        var_dump($login, $password);
 
+        var_dump(password_verify($password, $data['despassword']));
+       // exit;
         //Verifica se a senha inserida corresponde a senha do usuário
         if(password_verify($password, $data['despassword']))
         {
-            var_dump($data);
+
             //Cria um objeto usuário
             $user= new User();
+
+            $data['desperson']= utf8_encode($data['desperson']);
+
             //Preenche um array com os dados desse objeto
             $user->setData($data);
 
@@ -113,8 +123,9 @@ class User extends Model
         }
         else
         {
-            throw new \Exception("Usuário inexistente ou senha invalida.");
+            throw new \Exception("Usuário inexistente ou senha invalida brother.");
         }
+
     }
 
     /**
@@ -125,12 +136,43 @@ class User extends Model
     public static function verifyLogin($inadmin=true)
     {
         //Verificação de administrador
-        if(!User::checkLogin($inadmin))
+        if(User::checkLogin($inadmin))
         {
-            header("Location: /admin/login");
-            exit;
+            if($inadmin)
+            {
+                header("Location: /admin/login");
+                exit;
+            }
+            else
+            {
+                header("Location: /login");
+                exit;
+            }
         }
-        
+    }
+
+    /**
+     * Método responsável por verificar se o usuario deslogou
+     *
+     * @return void
+     */
+    public static function verifyLogout()
+    {
+
+        //Se existe a sessão de usuário
+        if(isset($_SESSION[user::SESSION]) )    
+        {
+            if((bool)$_SESSION[user::SESSION]['inadmin'] === true)
+            {
+                header("Location: /admin");
+                exit;
+            }
+            else
+            {
+                header("Location: /");
+                exit;
+            }
+        }
     }
 
     /**
@@ -162,12 +204,13 @@ class User extends Model
      */
     public function save()
     {
+
         $sql= new Sql();
 
         $result=$sql->select("CALL sp_users_save(:desperson, :deslogin, :despassword, :desemail, :nrphone, :inadmin)",array(
-            ":desperson"=>$this->getdesperson(),
+            ":desperson"=>utf8_decode($this->getdesperson()),
             ":deslogin"=>$this->getdeslogin(),
-            ":despassword"=>$this->getdespassword(),
+            ":despassword"=>User::getPasswordHash($this->getdespassword()),
             ":desemail"=>$this->getdesemail(),
             ":nrphone"=>$this->getnrphone(),
             ":inadmin"=>$this->getinadmin()
@@ -175,6 +218,11 @@ class User extends Model
 
             $this->setData($result[0]);
 
+    }
+
+    public static function getPasswordHash($password)
+    {
+        return password_hash($password, PASSWORD_DEFAULT,['cost'=>12]);
     }
 
     /**
@@ -200,13 +248,14 @@ class User extends Model
      */
     public function update()
     {
+
         $sql= new Sql();
 
         $result=$sql->select("CALL sp_usersupdate_save(:iduser,:desperson, :deslogin, :despassword, :desemail, :nrphone, :inadmin)",array(
             ":iduser"=>$this->getiduser(),
-            ":desperson"=>$this->getdesperson(),
+            ":desperson"=>utf8_decode($this->getdesperson()),
             ":deslogin"=>$this->getdeslogin(),
-            ":despassword"=>$this->getdespassword(),
+            ":despassword"=>User::getPasswordHash($this->getdespassword()),
             ":desemail"=>$this->getdesemail(),
             ":nrphone"=>$this->getnrphone(),
             ":inadmin"=>$this->getinadmin()
@@ -378,6 +427,44 @@ class User extends Model
             ':password'=>$password,
             ':iduser'=>$this->getiduser()
         ));
+    }
+
+    /**
+     * Método responsável por atualizar uma mensagem de erro
+     *
+     * @param string $error
+     * @param string $message
+     * @return void
+     */
+    public static function setError(&$error,$message)
+    {
+        $error=$message;
+    }
+
+    /**
+     * Método responsável por retornar uma mensagem de erro
+     *
+     * @param string $error
+     * @return string
+     */
+    public static function getError(&$error)
+    {
+        $message= (isset($error) && $error)? $error : '';
+
+        User::clearError($error);
+
+        return $message;
+    }
+
+    /**
+     * Método responsável por limpar a mensagem de erro para que ela não seja exibida na tela
+     *
+     * @param string $error
+     * @return void
+     */
+    public static function clearError(&$error)
+    {
+        $error = NUll;
     }
 
 
