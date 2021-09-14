@@ -123,7 +123,7 @@ class User extends Model
         }
         else
         {
-            throw new \Exception("Usuário inexistente ou senha invalida brother.");
+            throw new \Exception("Usuário inexistente ou senha invalida.");
         }
 
     }
@@ -318,7 +318,7 @@ class User extends Model
             //Verifica se foi criado o registro da recuperação
             if(count($recovery)===0)
             {
-                throw new \Exception("ão foi possivel recuperar a senha",1);
+                throw new \Exception("Não foi possivel recuperar a senha",1);
             }
             //Cria o link com o código de recuperação que será enviado por email e envia o email
             else
@@ -339,30 +339,30 @@ class User extends Model
      */
     private static function sendEmail($dataRecovery,$inadmin,$dataUser)
     {
-                //Criptografia dos dados
-                $code = openssl_encrypt($dataRecovery['idrecovery'],'AES-128-CBC',pack("a16",User::SECRET),0,pack('a16',User::SECRET_IV));
-                $code = base64_encode($code);;
+        //Criptografia dos dados
+        $code = openssl_encrypt($dataRecovery['idrecovery'],'AES-128-CBC',pack("a16",User::SECRET),0,pack('a16',User::SECRET_IV));
+        $code = base64_encode($code);;
 
-                if($inadmin===true)
-                {
-                    //Link de recuperação de senha do administrador
-                    $link = "http://www.andrecommerce.com.br/admin/forgot/reset?code=$code";
-                }
+        if($inadmin===true)
+        {
+            //Link de recuperação de senha do administrador
+            $link = "http://www.andrecommerce.com.br/admin/forgot/reset?code=$code";
+        }
 
-                else
-                {
-                    //Link de recuperação de senha do usuário comum
-                    $link = "http://www.hcodecommerce.com.br/forgot/reset?code=$code";
-                }
-                
-                //Instanciando classe que realizara o envio do email
-                $mailer = new Mailer($dataUser['desemail'],$dataUser['desperson'],"Redefinir a senha da HCODE Store", "forgot", array(
-                    "name"=>$dataUser['desperson'],
-                    "link"=>$link
-                ));
+        else
+        {
+            //Link de recuperação de senha do usuário comum
+            $link = "http://www.andrecommerce.com.br/forgot/reset?code=$code";
+        }
+        
+        //Instanciando classe que realizara o envio do email
+        $mailer = new Mailer($dataUser['desemail'],$dataUser['desperson'],"Redefinir a senha da HCODE Store", "forgot", array(
+            "name"=>$dataUser['desperson'],
+            "link"=>$link
+        ));
 
-                //Enviando Email de recuperação para o usuário
-                $mailer->send();
+        //Enviando Email de recuperação para o usuário
+        $mailer->send();
     }
 
     /**
@@ -422,11 +422,14 @@ class User extends Model
      */
     public function setPassword($password)
     {
+        $password = User::getPasswordHash($password);
+        
         $sql = new Sql();
         $sql->query("UPDATE tb_users set despassword = :password WHERE iduser= :iduser", array(
             ':password'=>$password,
             ':iduser'=>$this->getiduser()
         ));
+
     }
 
     /**
