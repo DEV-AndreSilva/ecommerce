@@ -467,6 +467,24 @@ class User extends Model
         $error = NUll;
     }
 
+    /**
+     * Método responsável por verificar se um usuário ja existe no banco de de dados
+     *
+     * @param string $login
+     * @return bool
+     */
+    public static function checkLoginExist($login)
+    {
+        $sql = new Sql();
+
+        $results = $sql->select('SELECT * FROM tb_users WHERE deslogin=:deslogin', [
+            ':deslogin'=>$login
+        ]);
+
+        return (count($results)>0);
+    }
+
+
 
 
 }
