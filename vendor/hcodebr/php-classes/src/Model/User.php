@@ -32,6 +32,9 @@ class User extends Model
             $user->setData($_SESSION[User::SESSION]);
         }
 
+        //var_dump($user);
+        //exit;
+
         return $user;
     }
 
@@ -242,16 +245,17 @@ class User extends Model
     }
 
     /**
-     * Método responsável por atualizar um registro no banco de dados
+     * Método responsável por atualizar um registro de usuário no banco de dados
      *
      * @return void
      */
     public function update()
-    {
-
+    {       
         $sql= new Sql();
-
-        $result=$sql->select("CALL sp_usersupdate_save(:iduser,:desperson, :deslogin, :despassword, :desemail, :nrphone, :inadmin)",array(
+   
+        //procedure de atualização
+        $result=$sql->select("CALL sp_usersupdate_save (:iduser, :desperson, :deslogin, :despassword, :desemail, :nrphone, :inadmin)"
+        ,[
             ":iduser"=>$this->getiduser(),
             ":desperson"=>utf8_decode($this->getdesperson()),
             ":deslogin"=>$this->getdeslogin(),
@@ -259,9 +263,16 @@ class User extends Model
             ":desemail"=>$this->getdesemail(),
             ":nrphone"=>$this->getnrphone(),
             ":inadmin"=>$this->getinadmin()
-            ));
+        ]);
 
+        if(count($result)>0)
+        {
             $this->setData($result[0]);
+            
+            //Atualiza uma sessão com os dados do usuário modificados
+            $_SESSION[User::SESSION] = $this->getValues();
+        }
+            
     }
 
     /**
