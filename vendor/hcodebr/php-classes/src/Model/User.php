@@ -32,9 +32,6 @@ class User extends Model
             $user->setData($_SESSION[User::SESSION]);
         }
 
-        //var_dump($user);
-        //exit;
-
         return $user;
     }
 
@@ -257,7 +254,7 @@ class User extends Model
         $result=$sql->select("CALL sp_usersupdate_save (:iduser, :desperson, :deslogin, :despassword, :desemail, :nrphone, :inadmin)"
         ,[
             ":iduser"=>$this->getiduser(),
-            ":desperson"=>utf8_decode($this->getdesperson()),
+            ":desperson"=>$this->getdesperson(),
             ":deslogin"=>$this->getdeslogin(),
             ":despassword"=>User::getPasswordHash($this->getdespassword()),
             ":desemail"=>$this->getdesemail(),

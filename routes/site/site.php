@@ -34,10 +34,14 @@ $app->get('/cart', function(){
 
 	$page = new Page(['data'=>["vlprice"=>$totalCart['vlprice'], "nrqtd"=>$totalCart['nrqtd']]]);
 	
+	$errorCep=isset($_SESSION[Cart::ERROR])? Cart::getError(Cart::ERROR): '';
+	$errorFrete =isset($_SESSION[Cart::SESSION_ERROR])? Cart::getError(Cart::SESSION_ERROR): '';
+
 	$page->setTpl("cart",[
 		'cart'=>$cart->getValues(),
 		'products'=>$cart->getProducts(),
-		'error'=>Cart::getMsgError()
+		'error'=>$errorFrete,
+		'errorCEP'=>$errorCep
 	]);
 });
 
@@ -115,11 +119,43 @@ $app->get("/checkout", function(){
 	User::verifyLogin(false);
 
 	$address= new Address();
+
 	$cart =  Cart::getFromSession();
 
+
+
+	if(isset($_GET['zipcode']))
+	{
+		$result = $cart->setFreight($_GET['zipcode']);
+
+		if(isset ($_SESSION[Cart::SESSION_ERROR]))
+		{
+			Cart::clearError(Cart::SESSION_ERROR);
+
+			Cart::setError(Cart::ERROR,"Antes de finalizar a compra informe um CEP valido para calcularmos os frete");
+
+			header("Location: /cart");
+			exit;
+		}
+		
+		$address->loadFromCEP($_GET['zipcode']);
+
+		$cart->setdeszipcode($_GET['zipcode']);
+
+		$cart->save();
+	}
+	else
+	{	
+		Cart::setError(Cart::ERROR,"Antes de finalizar a compra informe o seu CEP para calcularmos os frete");
+
+		header("Location: /cart");
+		exit;
+	}
+	
 	$totalCart=$cart->getCalculateTotal();
 
 	$page = new Page(['data'=>["vlprice"=>$totalCart['vlprice'], "nrqtd"=>$totalCart['nrqtd']]]);
+
 
 	$page->setTpl("checkout",[
 		'cart'=>$cart->getValues(),
@@ -127,6 +163,12 @@ $app->get("/checkout", function(){
 	]);
 });
 
+
+
+$app->Post("/checkout", function(){
+
+
+});
 
 
 //Rota GET - Página de Login
@@ -278,7 +320,7 @@ $app->post("/forgot/reset", function(){
 	//recebendo o id do usuário
 	$user->get((int)$forgot['iduser']);
 
-	//criptografando nova senha
+	//recebendo nova senha
 	$password = $_POST['password'];
 
 	//Trocando a senha do usuário
@@ -297,7 +339,11 @@ $app->get("/profile", function(){
 
 	$user = User::getFromSession();
 
-	$page= new Page();
+	$cart= Cart::getFromSession();
+
+	$totalCart=$cart->getCalculateTotal();
+
+	$page = new Page(['data'=>["vlprice"=>$totalCart['vlprice'], "nrqtd"=>$totalCart['nrqtd']]]);
 
 	$page->setTpl('profile', [
 		'user'=>$user->getValues(),

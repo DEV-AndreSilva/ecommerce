@@ -8,6 +8,8 @@ class Cart extends Model
 {
     const SESSION = "Cart";
     const SESSION_ERROR="CartError";
+    const ERROR = "ErrorFrete"; 
+    
 
     /**
      * Método responsável por recuperar os dados do carrinho pelos dados de uma sessão
@@ -176,9 +178,9 @@ class Cart extends Model
         ":idproduct"=>$product->getidproduct()
         ]);
 
-        if( ($this->getMsgError())!=null)
+        if( ($this->getMsgError($_SESSION[Cart::SESSION_ERROR]))!=null)
         {
-            $this->clearMsgError();
+            $this->clearMsgError($_SESSION[Cart::SESSION_ERROR]);
         }
 
     }
@@ -214,9 +216,9 @@ class Cart extends Model
             ]);
         }
 
-        if( ($this->getMsgError())!=null)
+        if( ($this->getMsgError($_SESSION[Cart::SESSION_ERROR]))!=null)
         {
-            $this->clearMsgError();
+            $this->clearMsgError($_SESSION[Cart::SESSION_ERROR]);
         }
     }
 
@@ -302,11 +304,11 @@ class Cart extends Model
             //Se a consulta ao web service retornar um erro 
             if($result->MsgErro != "")
             {
-                Cart::setMsgError((string)$result->MsgErro);               
+                Cart::setError(Cart::SESSION_ERROR,(string)$result->MsgErro);               
             }
             else
             {
-                Cart::clearMsgError();
+                Cart::clearError($_SESSION[Cart::SESSION_ERROR]);
             }
                     
             //Prazo de entrega e valor do frete
@@ -338,34 +340,40 @@ class Cart extends Model
     }
 
     /**
-     * Método responsável por definir a mensagem de erro
+     * Método responsável por atualizar uma mensagem de erro
      *
+     * @param string $error
      * @param string $message
      * @return void
      */
-    public static function setMsgError($message)
+    public static function setError($typeError,$message)
     {
-        $_SESSION[Cart::SESSION_ERROR]= $message;
+        $_SESSION[$typeError]=$message;
     }
 
     /**
-     * Método responsável por retornar a mensagem de erro
+     * Método responsável por retornar uma mensagem de erro
      *
-     * @return void
+     * @param string $error
+     * @return string
      */
-    public static function getMsgError()
+    public static function getError($typeError)
     {
-        return isset($_SESSION[Cart::SESSION_ERROR]) ? $_SESSION[Cart::SESSION_ERROR] : null;
+        
+        $message= (isset($_SESSION[$typeError]) && $_SESSION[$typeError])? $_SESSION[$typeError] : '';
+        Cart::clearError($typeError);
+        return $message;
     }
 
     /**
-     * Método responsável por limpar o valor da mensagem de erro
+     * Método responsável por limpar a mensagem de erro para que ela não seja exibida na tela
      *
+     * @param string $error
      * @return void
      */
-    public static function clearMsgError()
+    public static function clearError($typeError)
     {
-        $_SESSION[Cart::SESSION_ERROR]= null;
+        $_SESSION[$typeError]=null;
     }
 
     /**
