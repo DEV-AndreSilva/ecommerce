@@ -34,8 +34,8 @@ $app->get('/cart', function(){
 
 	$page = new Page(['data'=>["vlprice"=>$totalCart['vlprice'], "nrqtd"=>$totalCart['nrqtd']]]);
 	
-	$errorCep=isset($_SESSION[Cart::ERROR])? Cart::getError(Cart::ERROR): '';
-	$errorFrete =isset($_SESSION[Cart::SESSION_ERROR])? Cart::getError(Cart::SESSION_ERROR): '';
+	$errorCep=Cart::getError(Cart::ERROR);
+	$errorFrete =Cart::getError(Cart::SESSION_ERROR);
 
 	$page->setTpl("cart",[
 		'cart'=>$cart->getValues(),
@@ -113,60 +113,174 @@ $app->post("/cart/freight", function(){
 
 });
 
-//Rota GET - Checkout de usuário logado para fazer a compra
-$app->get("/checkout", function(){
 
+//Rota GET - Checkout de usuário para fazer a compra
+$app->get("/checkout/finalizarcompra", function(){
+
+
+	//Verifica se o usuário está Logado
 	User::verifyLogin(false);
 
+	//Instancia objeto da classe que recebrea o endereço e dados do cliente
 	$address= new Address();
 
+	//Carrega os dados do carrinho pela sessão
 	$cart =  Cart::getFromSession();
 
-
-
-	if(isset($_GET['zipcode']))
+	//Verifica se o campo de CEP que preenche o zip code foi preenchido
+	if(isset($_GET['zipcode']) || !empty($cart->getdeszipcode()))
 	{
-		$result = $cart->setFreight($_GET['zipcode']);
+		$zipcode = $_GET['zipcode'] ?? $cart->getdeszipcode();
 
-		if(isset ($_SESSION[Cart::SESSION_ERROR]))
-		{
-			Cart::clearError(Cart::SESSION_ERROR);
+		//Carregar endereço de entrega
+		$address->loadFromCEP($zipcode);
 
-			Cart::setError(Cart::ERROR,"Antes de finalizar a compra informe um CEP valido para calcularmos os frete");
+		//Carregar valor do frete
+		$cart->setFreight($zipcode);
 
-			header("Location: /cart");
-			exit;
-		}
-		
-		$address->loadFromCEP($_GET['zipcode']);
+		//Atualiza o endereço do cep do carrinho
+		$cart->setdeszipcode($zipcode);
 
-		$cart->setdeszipcode($_GET['zipcode']);
-
+		//Salva o carrinho banco de dados
 		$cart->save();
 	}
 	else
 	{	
-		Cart::setError(Cart::ERROR,"Antes de finalizar a compra informe o seu CEP para calcularmos os frete");
+		//Mensagem de Erro caso o usuário deixo o CEP em branco
+		Address::setError(Address::ERROR,"Antes de finalizar a compra informe o seu CEP");
 
+		//Redirecionamento para mostrar o erro
+		header("Location: /checkout/finalizarcompra");
+		exit;
+	}
+
+	//Salvamento de informações caso usuário altere seus dados de entrega
+	if(isset($_SESSION['dadosFinalizar']))
+	{
+		$address->setData($_SESSION['dadosFinalizar']);
+		unset($_SESSION['dadosFinalizar']);
+	}
+	
+	//calcula o total dos pedidos
+	$totalCart=$cart->getCalculateTotal();
+
+	//calcula o preço do icone do carrinho
+	$page = new Page(['data'=>["vlprice"=>$totalCart['vlprice'], "nrqtd"=>$totalCart['nrqtd']]]);
+
+	//Renderiza o template
+	$page->setTpl("checkout",[
+		'cart'=>$cart->getValues(),
+		'address'=>$address->getValues(),
+		'products'=>$cart->getProducts(),
+		'error'=>Address::getError(Address::ERROR)
+	]);
+});
+
+//Rota GET - Checkout de usuário verificar a compra e valor do frete
+$app->get("/checkout", function(){
+
+	User::verifyLogin(false);
+
+	$cart =  Cart::getFromSession();
+
+	//Verifica se o usuário preencheu o campo CEP
+	if(isset($_GET['zipcode']))
+	{
+		//Carregar valor do frete
+		$cart->setFreight($_GET['zipcode']);
+		
+		//Se existe um Erro redireciona o usuário para o carrinho com a mensagem de erro
+		if(isset($_SESSION[Cart::ERROR]))
+		{
+			header("Location: /cart");
+			exit;
+		}
+
+		//Atualiza o CEP do carrinho 
+		$cart->setdeszipcode($_GET['zipcode']);
+
+		//Salva os dados no banco de dados
+		$cart->save();
+
+		//Redireciona o usuário para a pagina de finalização de compra
+		header("Location: /checkout/finalizarcompra");
+	}
+	else
+	{	
+		//Caso CEP esteja em branco  atualiza a pagina mostrando o erro
+		Cart::setError(Cart::ERROR,"Antes de finalizar a compra informe o seu CEP para calcularmos os frete");
 		header("Location: /cart");
 		exit;
 	}
 	
-	$totalCart=$cart->getCalculateTotal();
 
-	$page = new Page(['data'=>["vlprice"=>$totalCart['vlprice'], "nrqtd"=>$totalCart['nrqtd']]]);
-
-
-	$page->setTpl("checkout",[
-		'cart'=>$cart->getValues(),
-		'address'=>$address->getValues()
-	]);
 });
 
-
-
+//Rota POST - Rota de finalizar compra
 $app->Post("/checkout", function(){
 
+	User::verifyLogin(false);
+
+	$_SESSION['dadosFinalizar']= $_POST;
+
+	if(!isset($_POST['zipcode']) || $_POST['zipcode']==='')
+	{
+		Address::setError(Address::ERROR, "Informe seu CEP");
+		header("Location: /checkout/finalizarcompra");
+		exit;
+	}
+	
+	if(!isset($_POST['desaddress']) || $_POST['desaddress']==='')
+	{
+		Address::setError(Address::ERROR, "Informe seu Endereço");
+		header("Location: /checkout/finalizarcompra");
+		exit;
+	}
+	
+	if(!isset($_POST['desdistrict']) || $_POST['desdistrict']==='')
+	{
+		Address::setError(Address::ERROR, "Informe seu Bairro");
+		header("Location: /checkout/finalizarcompra");
+		exit;
+	}
+
+	if(!isset($_POST['desstate']) || $_POST['desstate']==='')
+	{
+		Address::setError(Address::ERROR, "Informe seu estado");
+		header("Location: /checkout/finalizarcompra");
+		exit;
+	}
+
+	if(!isset($_POST['descountry']) || $_POST['descountry']==='')
+	{
+		Address::setError(Address::ERROR, "Informe seu Pais");
+		header("Location: /checkout/finalizarcompra");
+		exit;
+	}
+
+
+	$user = User::getFromSession();
+
+	$address = new Address();
+
+	$_POST['deszipcode']= $_POST['zipcode'];
+	$_POST['idperson']=$user->getidperson();
+
+	$address->validateCamp($_POST);
+
+
+	$address->setData($_POST);
+
+	$address->save();
+
+	//Salvamento de informações caso usuário altere seus dados de entrega
+	if(isset($_SESSION['dadosFinalizar']))
+	{
+		unset($_SESSION['dadosFinalizar']);
+	}
+
+	header("Location: /order");
+	exit;
 
 });
 

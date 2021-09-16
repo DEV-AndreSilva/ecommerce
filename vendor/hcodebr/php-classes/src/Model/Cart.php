@@ -178,9 +178,9 @@ class Cart extends Model
         ":idproduct"=>$product->getidproduct()
         ]);
 
-        if( ($this->getMsgError($_SESSION[Cart::SESSION_ERROR]))!=null)
+        if( ($this->getError(Cart::SESSION_ERROR))!=null)
         {
-            $this->clearMsgError($_SESSION[Cart::SESSION_ERROR]);
+            $this->clearError(Cart::SESSION_ERROR);
         }
 
     }
@@ -216,9 +216,9 @@ class Cart extends Model
             ]);
         }
 
-        if( ($this->getMsgError($_SESSION[Cart::SESSION_ERROR]))!=null)
+        if( ($this->getError(Cart::SESSION_ERROR))!=null)
         {
-            $this->clearMsgError($_SESSION[Cart::SESSION_ERROR]);
+            $this->clearError(Cart::SESSION_ERROR);
         }
     }
 
@@ -308,7 +308,7 @@ class Cart extends Model
             }
             else
             {
-                Cart::clearError($_SESSION[Cart::SESSION_ERROR]);
+                Cart::clearError(Cart::SESSION_ERROR);
             }
                     
             //Prazo de entrega e valor do frete
@@ -368,7 +368,7 @@ class Cart extends Model
     /**
      * Método responsável por limpar a mensagem de erro para que ela não seja exibida na tela
      *
-     * @param string $error
+     * @param string $typeError
      * @return void
      */
     public static function clearError($typeError)
