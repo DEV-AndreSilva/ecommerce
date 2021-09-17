@@ -18,6 +18,13 @@ require_once('functions.php');
 
 //Inclusão dos arquivos de rotas do site
 require_once('routes'.DIRECTORY_SEPARATOR.'site'.DIRECTORY_SEPARATOR.'site.php');
+require_once('routes'.DIRECTORY_SEPARATOR.'site'.DIRECTORY_SEPARATOR.'site-login.php');
+require_once('routes'.DIRECTORY_SEPARATOR.'site'.DIRECTORY_SEPARATOR.'site-forgot.php');
+require_once('routes'.DIRECTORY_SEPARATOR.'site'.DIRECTORY_SEPARATOR.'site-userProfile.php');
+require_once('routes'.DIRECTORY_SEPARATOR.'site'.DIRECTORY_SEPARATOR.'site-cart.php');
+require_once('routes'.DIRECTORY_SEPARATOR.'site'.DIRECTORY_SEPARATOR.'site-finalizarCompra.php');
+require_once('routes'.DIRECTORY_SEPARATOR.'site'.DIRECTORY_SEPARATOR.'site-categories.php');
+require_once('routes'.DIRECTORY_SEPARATOR.'site'.DIRECTORY_SEPARATOR.'site-products.php');
 
 //Inclusão dos arquivos de rotas do administrador
 require_once('routes'.DIRECTORY_SEPARATOR.'admin'.DIRECTORY_SEPARATOR.'admin-login.php');
@@ -27,8 +34,7 @@ require_once('routes'.DIRECTORY_SEPARATOR.'admin'.DIRECTORY_SEPARATOR.'admin-cat
 require_once('routes'.DIRECTORY_SEPARATOR.'admin'.DIRECTORY_SEPARATOR.'admin-products.php');
 
 //Inclusão dos arquivos de rotas do Site
-require_once('routes'.DIRECTORY_SEPARATOR.'categories'.DIRECTORY_SEPARATOR.'categories.php');
-require_once('routes'.DIRECTORY_SEPARATOR.'products'.DIRECTORY_SEPARATOR.'products.php');
+
 
 
 //Executa a rota

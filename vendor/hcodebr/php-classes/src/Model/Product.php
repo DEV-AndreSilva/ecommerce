@@ -1,5 +1,4 @@
 <?php
-
 namespace Hcode\Model;
 
 use GdImage;
