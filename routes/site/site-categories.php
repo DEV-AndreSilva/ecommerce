@@ -14,11 +14,8 @@ $app->get('/categories/:idcategory', function($idcategory){
 
 	$pagination = $category->getProductsPagination($currentPage);
 	
-    $cart= Cart::getFromSession();
 
-	$totalCart=$cart->getCalculateTotal();
-
-	$page = new Page(['data'=>["vlprice"=>$totalCart['vlprice'], "nrqtd"=>$totalCart['nrqtd']]]);
+	$page = new Page();
 
 	$page->setTpl("category",[
 		"category"=>$category->getValues(),

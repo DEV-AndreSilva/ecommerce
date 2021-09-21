@@ -10,12 +10,13 @@ $app->get('/cart', function(){
 
 	$cart= Cart::getFromSession();
 
-	$totalCart=$cart->getCalculateTotal();
 
-	$page = new Page(['data'=>["vlprice"=>$totalCart['vlprice'], "nrqtd"=>$totalCart['nrqtd']]]);
+	$page = new Page();
 	
 	$errorCep=Cart::getError(Cart::ERROR);
 	$errorFrete =Cart::getError(Cart::SESSION_ERROR);
+
+
 
 	$page->setTpl("cart",[
 		'cart'=>$cart->getValues(),

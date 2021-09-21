@@ -1,5 +1,6 @@
 <?php
 
+use \Hcode\Model\Cart;
 use \Hcode\Model\User;
 
 /**
@@ -39,4 +40,22 @@ function getUserName()
 {
     $user=User::getFromSession();
     return $user->getdesperson();
+}
+
+function getCartNrqtd()
+{
+    $cart= Cart::getFromSession();
+
+    $totals = $cart->getProductsTotals();
+
+    return $totals['nrqtd'];
+}
+
+function getCartPrice()
+{
+    $cart= Cart::getFromSession();
+
+    $totals = $cart->getProductsTotals();
+
+    return formatPrice($totals['vlprice']);
 }

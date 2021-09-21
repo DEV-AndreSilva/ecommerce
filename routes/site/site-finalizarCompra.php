@@ -56,11 +56,8 @@ $app->get("/checkout/finalizarcompra", function(){
 		unset($_SESSION['dadosFinalizar']);
 	}
 	
-	//calcula o total dos pedidos
-	$totalCart=$cart->getCalculateTotal();
-
 	//calcula o preço do icone do carrinho
-	$page = new Page(['data'=>["vlprice"=>$totalCart['vlprice'], "nrqtd"=>$totalCart['nrqtd']]]);
+	$page = new Page();
 
 	//Renderiza o template
 	$page->setTpl("checkout",[
@@ -220,7 +217,7 @@ $app->get("/boleto/:idorder", function($idOrder){
 
 	$dias = 5;
 
-	$valor_cobrado =  formatPrice($order->getvltotal());
+	$valor_cobrado =  $order->getvltotal();
 
 	$dados_boleto = [
 		"nosso_numero"=>$order->getidorder(),
@@ -242,9 +239,8 @@ $app->get("/boleto/:idorder", function($idOrder){
 	require_once($path."funcoes_itau.php");
 	require_once($path."layout_itau.php");
 	
-
-
-
 });
+
+
 
 

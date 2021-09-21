@@ -21,14 +21,16 @@ class Cart extends Model
         $cart = new Cart();
 
         //Verifica se existe uma sessão e o id do carrinho para recuperar o carrinho
-        if(isset($_SESSION[Cart::SESSION]) && (int)$_SESSION[Cart::SESSION]['idcart']>0 )
+        if(isset($_SESSION[Cart::SESSION]) && isset($_SESSION[Cart::SESSION]['idcart']))
         {
+            if((int)$_SESSION[Cart::SESSION]['idcart']>0)
             $cart->get((int)$_SESSION[Cart::SESSION]['idcart']);
         }
         else
         {
             //Verifica se o Id da sessão ainda esta ativo para recuperar o carrinho
             $cart->getFromSessionID();
+           
 
             //Se não há Id da sessão cria um novo objeto carrinho
             if(!(int)$cart->getidcart()>0)
@@ -39,7 +41,7 @@ class Cart extends Model
                 ];
 
                 //Verifica o Login do usuário
-                if(User::checkLogin(false)==true)
+                if(!User::checkLogin(false)==true)
                 {
                     //Recebe os dados de um usuário pela sessão caso ela exista
                     $user= User::getFromSession();
@@ -48,7 +50,7 @@ class Cart extends Model
 
                 //preenche o carrinho com os dados da sessão e o id do usuário caso ele exista
                 $cart->setData($data);
-
+                
                 //Cria um novo registro de carrinho no banco de dados
                 $cart->save();
 
@@ -120,13 +122,14 @@ class Cart extends Model
     {
         $sql = new Sql();
 
-        $result = $sql->select("CALL sp_carts_save(:pidcart,:pdessessionid,:piduser,:pdeszipcode,:pvlfreight,:pnrdays)", [
+        $result = $sql->select("CALL sp_carts_save(:pidcart,:pdessessionid,:piduser,:pdeszipcode,:pvlfreight,:pnrdays,:pidaddress)", [
             ":pidcart"=>$this->getidcart(),
             ":pdessessionid"=>$this->getdessessionid(),
             ":piduser"=>$this->getiduser(),
             ":pdeszipcode"=>$this->getdeszipcode(),
             ":pvlfreight"=>$this->getvlfreight(),
             ":pnrdays"=>$this->getnrdays(),
+            ":pidaddress"=>isset($this->idaddress) ? $this->idaddress : null
         ]);
 
         if(count($result)>0)

@@ -496,6 +496,26 @@ class User extends Model
     }
 
 
+    public function getOrders()
+    {
+         $sql = new Sql();
+
+        $results=$sql->select("SELECT *
+        FROM tb_orders a 
+        INNER JOIN tb_carts b ON  b.idcart=a.idcart
+        INNER JOIN tb_ordersstatus USING(idstatus)
+        INNER JOIN tb_users c ON c.iduser = a.iduser
+        INNER JOIN tb_persons d ON d.idperson = a.iduser
+        INNER JOIN tb_addresses e ON e.idaddress = d.idaddress
+        WHERE a.iduser= :iduser",[
+                 ":iduser"=>$this->getiduser()
+             ]);
+        
+        if(count($results)>0)
+        {
+            return $results;
+        }
+    }
 
 
 }

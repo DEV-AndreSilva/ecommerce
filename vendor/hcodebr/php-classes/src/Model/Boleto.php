@@ -19,11 +19,15 @@ class Boleto
 	{
 		$this->dias_de_prazo_para_pagamento = $dias_de_prazo_para_pagamento;
 		$this->taxa_boleto = $taxa_boleto;
+		$this->valor_cobrado = $valor_cobrado; // Valor - REGRA: Sem pontos na milhar e tanto faz com "." ou "," ou com 1 ou 2 ou sem casa decimal
+		
 		$this->data_venc = date("d/m/Y", time() + ($dias_de_prazo_para_pagamento * 86400));  // Prazo de X dias OU informe data: "13/04/2006"; 
 		
-		$this->valor_cobrado = $valor_cobrado; // Valor - REGRA: Sem pontos na milhar e tanto faz com "." ou "," ou com 1 ou 2 ou sem casa decimal
-		$this->valor_cobrado = str_replace(",", ".",$valor_cobrado);
-		$this->valor_boleto=number_format($valor_cobrado+$taxa_boleto, 2, ',', '');
+		
+		$this->valor_boleto = $valor_cobrado+$taxa_boleto;
+		$this->valor_boleto=str_replace(".", ",",$this->valor_boleto);
+
+	
 
 		$this->dadosboleto = [
 		

@@ -9,13 +9,8 @@ $app->get("/products/:desurl", function($desurl){
     $product = new Product();
     $product->getFromUrl($desurl);
 
-    $cart= Cart::getFromSession();
-
-	$totalCart=$cart->getCalculateTotal();
-
-	$page = new Page(['data'=>["vlprice"=>$totalCart['vlprice'], "nrqtd"=>$totalCart['nrqtd']]]);
-
-
+	$page = new Page();
+    
     $page->setTpl("product-detail", [
         "product"=>$product->getValues(),
         "categories"=>$product->getCategories()

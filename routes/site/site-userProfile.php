@@ -2,7 +2,10 @@
 
 use \Hcode\Model\User;
 use \Hcode\Model\Cart;
+use Hcode\Model\Order;
 use \Hcode\Pages\Page;
+
+
 
 
 
@@ -14,11 +17,7 @@ $app->get("/profile", function(){
 
 	$user = User::getFromSession();
 
-	$cart= Cart::getFromSession();
-
-	$totalCart=$cart->getCalculateTotal();
-
-	$page = new Page(['data'=>["vlprice"=>$totalCart['vlprice'], "nrqtd"=>$totalCart['nrqtd']]]);
+	$page = new Page();
 
 	$page->setTpl('profile', [
 		'user'=>$user->getValues(),
@@ -78,5 +77,45 @@ $app->post("/profile", function(){
 
 	header('Location: /profile');
 	exit;
+
+});
+
+//Rota GET - Pagina de pedidos de usuário
+$app->get('/profile/orders', function(){
+	User::verifyLogin(false);
+
+	$user=User::getFromSession();
+
+	$page = new Page();
+
+	$page->setTpl("profile-orders",[
+		"orders"=>$user->getOrders()
+
+	]);
+});
+
+//Rota GET - Detalhes do Pedido
+$app->get("/profile/orders/:idorder", function($idorder){
+
+	User::verifyLogin(false);
+
+	$order = new Order();
+	$order->get((int)$idorder);
+
+	$cart = new Cart();
+	$cart->get((int)$order->getidcart());
+
+	$cart->getCalculateTotal();
+	
+	$page = new page();
+
+
+	$page->setTpl('profile-orders-detail',[
+		"order"=>$order->getValues(),
+		"products"=>$cart->getProducts(),
+		"cart"=> $cart->getValues()
+	]);
+
+
 
 });
