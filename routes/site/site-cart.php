@@ -16,8 +16,6 @@ $app->get('/cart', function(){
 	$errorCep=Cart::getError(Cart::ERROR);
 	$errorFrete =Cart::getError(Cart::SESSION_ERROR);
 
-
-
 	$page->setTpl("cart",[
 		'cart'=>$cart->getValues(),
 		'products'=>$cart->getProducts(),

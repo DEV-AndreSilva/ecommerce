@@ -121,6 +121,8 @@ class Cart extends Model
     public function save()
     {
         $sql = new Sql();
+        
+      
 
         $result = $sql->select("CALL sp_carts_save(:pidcart,:pdessessionid,:piduser,:pdeszipcode,:pvlfreight,:pnrdays,:pidaddress)", [
             ":pidcart"=>$this->getidcart(),
@@ -129,12 +131,12 @@ class Cart extends Model
             ":pdeszipcode"=>$this->getdeszipcode(),
             ":pvlfreight"=>$this->getvlfreight(),
             ":pnrdays"=>$this->getnrdays(),
-            ":pidaddress"=>isset($this->idaddress) ? $this->idaddress : null
+            ":pidaddress"=>$this->getidaddress()
         ]);
 
         if(count($result)>0)
         {
-            $this->setData($result[0]);
+            $this->setData($result[0]);           
         }
     }
 
@@ -314,8 +316,9 @@ class Cart extends Model
                 Cart::clearError(Cart::SESSION_ERROR);
             }
                     
+          
             //Prazo de entrega e valor do frete
-            $this->setnrdays($result->PrazoEntrega);
+            $this->setnrdays((int)$result->PrazoEntrega);
             $this->setvlfreight(CART::formatValueToDecimal($result->Valor));
             $this->setdeszipcode($nrzipcode);
                     

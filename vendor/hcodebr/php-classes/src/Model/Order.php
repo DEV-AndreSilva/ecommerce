@@ -30,15 +30,21 @@ class Order extends Model
     {
         $sql = new Sql();
 
-        $results=$sql->select("SELECT * FROM tb_orders a 
-        INNER JOIN tb_ordersstatus b USING(idstatus)
-        INNER JOIN tb_carts c USING(idcart)
-        INNER JOIN tb_users d ON d.iduser = a.iduser
-        INNER JOIN tb_addresses e ON d.idperson=a.iduser
-        INNER JOIN tb_persons f ON f.idperson = d.idperson
-        WHERE a.idorder= :idorder",[
-                 ":idorder"=>$idOrder
-             ]);
+        $results=$sql->select("SELECT a.idorder,a.idcart,a.iduser,a.idstatus,a.idaddress,a.vltotal,a.dtregister,
+         b.deszipcode,b.vlfreight,
+         d.desstatus,
+         e.desaddress,e.desdistrict,e.descity,e.desstate
+         
+      FROM tb_orders a 
+      JOIN tb_carts b ON b.idcart = a.idcart
+      JOIN tb_users c ON c.iduser = a.iduser
+      JOIN tb_ordersstatus d ON d.idstatus=a.idstatus
+      JOIN tb_addresses e ON e.idaddress = a.idaddress
+      JOIN tb_persons f ON f.idperson=a.iduser
+      WHERE a.idorder= :idorder",[
+             ":idorder"=>$idOrder
+         ]);
+        
         
         if(count($results)>0)
         {
