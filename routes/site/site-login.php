@@ -22,7 +22,7 @@ $app->post("/login", function()
 {
 	try
 	{
-		$user = User::login($_POST['login'],$_POST['password']);
+		User::login($_POST['login'],$_POST['password']);
 		header("Location: /cart");
 		exit;
 	}

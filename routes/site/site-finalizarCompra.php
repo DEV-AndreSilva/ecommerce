@@ -226,10 +226,7 @@ $app->get("/boleto/:idorder", function($idOrder){
 	//Carrega a order do usuário
 	$order = new Order();
 	$order->get((int)$idOrder);
-
-
 	
-
 	//carrega os dados do boleto
 	$dias = 5;
 	$valor_cobrado =  $order->getvltotal();

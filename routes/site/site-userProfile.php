@@ -135,8 +135,6 @@ $app->post("/profile/change-password", function(){
 
 	User::verifyLogin(false);
 
-	
-
 	if(!isset($_POST['current_pass']) || $_POST['current_pass']==='')
 	{
 		User::setError($_SESSION[User::ERROR], "Preencha o campo senha atual ");
@@ -166,21 +164,34 @@ $app->post("/profile/change-password", function(){
 		exit;
 	}
 
-	$user= User::getFromSession();
-
-	if(!password_verify($_POST['current_pass'], $user->getdespassword()));
+	if($_POST['new_pass']!==$_POST['new_pass_confirm'])
 	{
-		User::setError($_SESSION[User::ERROR], "Senha invalida!");
+		User::setError($_SESSION[User::ERROR], "Os campos senha e nova senha possuem valores diferentes");
 		header("Location: /profile/change-password");
 		exit;
 	}
 
-	$user->setdespassword($_POST['new_pass']);
+	$user= User::getFromSession();
 
-	$user->setPassword($user->getdespassword());
+	if(password_verify($_POST['current_pass'], $user->getdespassword()))
+	{
+		$user->setdespassword($_POST['new_pass']);
 
-	User::setError($_SESSION[User::SUCCESS], "Senha atualizado com Sucesso!");
-	header("Location: /profile/change-password");
+		$user->setPassword($user->getdespassword());
+	
+		User::setError($_SESSION[User::SUCCESS], "Senha atualizado com Sucesso!");
+		header("Location: /profile/change-password");
+		exit;
+	}
+	else
+	{
+		User::setError($_SESSION[User::ERROR], "Senha atual invalida!");
+		header("Location: /profile/change-password");
+		exit;
+
+	}
+
+
 
 	
 

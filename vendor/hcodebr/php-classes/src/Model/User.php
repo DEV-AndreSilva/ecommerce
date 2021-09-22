@@ -48,8 +48,10 @@ class User extends Model
             !$_SESSION[user::SESSION] ||                             //Se a sessão não está vazia ou é nula
             !(int)$_SESSION[user::SESSION]['iduser']>0)              //Se há um id de usuário nessa sessão
            {
+          
             //Não está Logado
             return true;
+            
            }
 
         else //Está logado
@@ -58,6 +60,7 @@ class User extends Model
             //Verifica se é uma rota da administraçao, se a sessão contem os dados de um administrador
             if($inadmin===true && (bool)$_SESSION[User::SESSION]['inadmin']===true)
             {
+               
                 return false;
             }
 
@@ -70,6 +73,7 @@ class User extends Model
             //Não está logado
             else
             {
+              
                 return true;
             }
         }
@@ -101,10 +105,6 @@ class User extends Model
         //Guarda os dados do usuário encontrado
         $data= $result[0];
        
-        var_dump($login, $password);
-
-        var_dump(password_verify($password, $data['despassword']));
-       // exit;
         //Verifica se a senha inserida corresponde a senha do usuário
         if(password_verify($password, $data['despassword']))
         {
@@ -119,7 +119,6 @@ class User extends Model
 
             //Cria uma sessão com os dados do usuário criado
             $_SESSION[User::SESSION] = $user->getValues();
-            return $user;
         }
         else
         {
@@ -158,7 +157,6 @@ class User extends Model
      */
     public static function verifyLogout()
     {
-
         //Se existe a sessão de usuário
         if(isset($_SESSION[user::SESSION]) )    
         {

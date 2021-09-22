@@ -12,9 +12,6 @@ $app->get('/cart', function(){
 
 	$page = new Page();
 	
-	var_dump($cart);
-	var_dump($_SESSION);
-            //exit;
 	$errorCep=Cart::getError(Cart::ERROR);
 	$errorFrete =Cart::getError(Cart::SESSION_ERROR);
 

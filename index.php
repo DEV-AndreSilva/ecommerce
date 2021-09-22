@@ -32,6 +32,7 @@ require_once('routes'.DIRECTORY_SEPARATOR.'admin'.DIRECTORY_SEPARATOR.'admin-use
 require_once('routes'.DIRECTORY_SEPARATOR.'admin'.DIRECTORY_SEPARATOR.'admin-forgot.php');
 require_once('routes'.DIRECTORY_SEPARATOR.'admin'.DIRECTORY_SEPARATOR.'admin-categories.php');
 require_once('routes'.DIRECTORY_SEPARATOR.'admin'.DIRECTORY_SEPARATOR.'admin-products.php');
+require_once('routes'.DIRECTORY_SEPARATOR.'admin'.DIRECTORY_SEPARATOR.'admin-orders.php');
 
 //Inclusão dos arquivos de rotas do Site
 
