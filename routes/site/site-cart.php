@@ -10,9 +10,11 @@ $app->get('/cart', function(){
 
 	$cart= Cart::getFromSession();
 
-
 	$page = new Page();
 	
+	var_dump($cart);
+	var_dump($_SESSION);
+            //exit;
 	$errorCep=Cart::getError(Cart::ERROR);
 	$errorFrete =Cart::getError(Cart::SESSION_ERROR);
 
@@ -84,6 +86,9 @@ $app->post("/cart/freight", function(){
 	$cart = Cart::getFromSession();
 
 	$cart->setFreight($_POST['zipcode']);
+
+	//var_dump($_POST);
+	//exit;
 
 	$cart->getCalculateTotal();
 

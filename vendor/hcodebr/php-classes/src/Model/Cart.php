@@ -70,6 +70,11 @@ class Cart extends Model
      */
     public function setToSession()
     {
+        if(isset($_SESSION[Cart::SESSION]))
+        {
+            unset($_SESSION[Cart::SESSION]);
+        }
+        
         $_SESSION[Cart::SESSION]=$this->getValues();
     }
 
@@ -275,6 +280,7 @@ class Cart extends Model
 
         $total = $this->getProductsTotals();
 
+        //var_dump($total);
         //Se a quantidade de produtos do carrinho é maior que 0
         if($total['nrqtd']>0)
         {
@@ -324,8 +330,23 @@ class Cart extends Model
                     
             //Atualização do carrinho no banco de dados
             $this->save();
+            $this->setToSession();
             return $result;
          
+        }
+        else
+        {
+            
+             //Prazo de entrega e valor do frete
+             $this->setnrdays(0);
+             $this->setvlfreight(0);
+
+             
+             $this->setToSession();
+
+             
+
+            Cart::setError(Cart::SESSION_ERROR,"Insira produtos no carrinho para que o frete possa ser calculado");  
         }
         
     }
@@ -415,9 +436,10 @@ class Cart extends Model
     {
         //$this->updateFreight();
         $totals = $this->getProductsTotals();
-        $this->setvlsubtotal($totals['vlprice']);
-        $this->setvltotal($totals['vlprice']+ $this->getvlfreight());
+        $this->setvlsubtotal( ($totals['vlprice'] !=0) ? $totals['vlprice'] : 0);
+        $this->setvltotal(($totals['vlprice'] != 0 ) ? $totals['vlprice']+ $this->getvlfreight(): 0);
 
+       
         return $totals;
     }
 

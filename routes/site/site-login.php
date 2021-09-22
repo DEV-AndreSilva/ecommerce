@@ -23,7 +23,7 @@ $app->post("/login", function()
 	try
 	{
 		$user = User::login($_POST['login'],$_POST['password']);
-		header("Location: /checkout");
+		header("Location: /cart");
 		exit;
 	}
 	catch(Exception $ex)

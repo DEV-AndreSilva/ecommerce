@@ -12,8 +12,7 @@ use \Hcode\Model\User;
 
 
 //Rota GET - Checkout de usuário para fazer a compra (botao validar cep carrinho)
-$app->get("/checkout/cep", function(){
-
+$app->get("/checkout/cart", function(){
 
 	//Verifica se o usuário está Logado
 	User::verifyLogin(false);
@@ -30,14 +29,18 @@ $app->get("/checkout/cep", function(){
 		$address = new Address();
 		$zipcode = $_GET['zipcode'] ?? $cart->getdeszipcode();
 
-		//Carregar endereço de entrega
-		$address->loadFromCEP($zipcode);
-
 		//Carregar valor do frete
 		$cart->setFreight($zipcode);
+
 		//Carrega o Id do usuário no carrinho
 		$cart->setiduser($user->getiduser());
 
+		//Se a busca pelo endereço no calculo do frete não retornar erro
+		if(!isset($_SESSION[Cart::SESSION_ERROR]))
+		{
+			//Carregar endereço de entrega
+			$address->loadFromCEP($zipcode);
+		}
 		//Atualiza o endereço do cep do carrinho
 		$cart->setdeszipcode($zipcode);
 
@@ -47,7 +50,17 @@ $app->get("/checkout/cep", function(){
 	else
 	{	
 		//Mensagem de Erro caso o usuário deixo o CEP em branco
-		Address::setError(Address::ERROR,"Antes de finalizar a compra informe o seu CEP");
+		Cart::setError(Cart::ERROR,"Antes de finalizar a compra informe o seu CEP");
+
+		//Redirecionamento para mostrar o erro
+		header("Location: /cart");
+		exit;
+	}
+
+	if(isset($_SESSION[Cart::SESSION_ERROR]))
+	{
+		//Mensagem de Erro caso o usuário deixo o CEP em branco
+		Cart::setError(Cart::ERROR,"Houve um problema na finalização da compra: ".Cart::getError(Cart::SESSION_ERROR));
 
 		//Redirecionamento para mostrar o erro
 		header("Location: /cart");
@@ -95,15 +108,6 @@ $app->get("/checkout", function(){
 
 		//Salva o carrinho banco de dados
 		$cart->save();
-	}
-	else
-	{	
-		//Mensagem de Erro caso o usuário deixo o CEP em branco
-		Address::setError(Address::ERROR,"Antes de finalizar a compra informe o seu CEP");
-
-		//Redirecionamento para mostrar o erro
-		header("Location: /checkout");
-		exit;
 	}
 	
 	//calcula o preço do icone do carrinho
@@ -224,6 +228,8 @@ $app->get("/boleto/:idorder", function($idOrder){
 	$order->get((int)$idOrder);
 
 
+	
+
 	//carrega os dados do boleto
 	$dias = 5;
 	$valor_cobrado =  $order->getvltotal();
@@ -231,8 +237,8 @@ $app->get("/boleto/:idorder", function($idOrder){
 		"nosso_numero"=>$order->getidorder(),
 		"numero_documento"=>$order->getidorder(),
 		"sacado"=>$order->getdesperson(),
-		"endereco1"=>$order->getdesaddress()." ".$order->getdesdistrict(),
-		"endereco2"=>$order->getdescity()." - ".$order->getdesstate()." ".$order->getdescountry()." ".$order->getdeszipcode(),
+		"endereco1"=>utf8_encode($order->getdesaddress())." ".utf8_encode($order->getdesdistrict()),
+		"endereco2"=>utf8_encode($order->getdescity())." - ".utf8_encode($order->getdesstate())." ".utf8_encode($order->getdescountry())." ".$order->getdeszipcode(),
 	];
 
 	//Cria um boleto
