@@ -60,11 +60,22 @@ $app->get('/admin/users/:iduser/delete', function($iduser)
 $app->post('/admin/users/:iduser',function($iduser)
 {
 	User::verifyLogin();
-
-	$_POST['inadmin']=(isset($_POST['inadmin']))?1 :0;
-
 	$user = new User();
 	$user->get((int)$iduser);
+
+	$_POST['inadmin']=isset($_POST['inadmin']) ? 1 :0;
+
+	//Se o administrador alterou a senha do usuário
+	if((isset($_POST['despassword']) && !empty($_POST['despassword'])))
+	 {
+		$_POST['despassword']= USER::getPasswordHash($_POST['despassword']); 
+	 }
+	 else
+	 {
+		$_POST['despassword'] = $user->getdespassword();
+	 } 
+
+	
 	$user->setData($_POST);
 	$user->update();
 
