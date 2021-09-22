@@ -430,7 +430,7 @@ class User extends Model
      */
     public function setPassword($password)
     {
-        var_dump($password, $this);
+       
         $password = User::getPasswordHash($password);
         
         $sql = new Sql();
@@ -438,6 +438,10 @@ class User extends Model
             ':password'=>$password,
             ':iduser'=>$this->getiduser()
         ));
+
+        $this->setdespassword($password);
+
+        $_SESSION[User::SESSION] = $this->getValues();
 
     }
 
