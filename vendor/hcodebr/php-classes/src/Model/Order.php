@@ -11,6 +11,11 @@ class Order extends Model
     const Success= "Sucesso";
     const Alert = "SemAlteracao";
 
+    /**
+     * Método responsável por cadastrar uma nova ordem de serviço no banco de dados ou atualizar ela caso ja exista
+     *
+     * @return void
+     */
     public function save()
     {
         $sql= new Sql();
@@ -32,6 +37,13 @@ class Order extends Model
    
 
     }
+
+    /**
+     * Método responsável pelo retorno de uma ordem de serviço especifica pelo seu ID
+     *
+     * @param int $idOrder
+     * @return void
+     */
     public function get($idOrder)
     {
         $sql = new Sql();
@@ -60,6 +72,11 @@ class Order extends Model
         }
     }
 
+    /**
+     * Método responsável pela listagem de todas as ordens de serviço
+     *
+     * @return array
+     */
     public static function listAll()
     {
        $sql = new Sql();
@@ -81,6 +98,9 @@ class Order extends Model
         return $results;
     }
 
+    /**
+     * Apaga um registro de ordens de serviço
+     */
     public function delete()
     {
         $sql = new Sql();
@@ -91,6 +111,11 @@ class Order extends Model
 
     }
 
+    /**
+     * Retorna um carrinho de uma ordem de serviço
+     *
+     * @return Cart
+     */
     public function getCart():Cart
     {
         $cart = new Cart();
@@ -100,6 +125,12 @@ class Order extends Model
         return $cart;
     }
 
+    /**
+     * Retorna uma mensagem 
+     *
+     * @param string $error
+     * @return void
+     */
     public static function getError($error)
     {
         $message = isset($_SESSION[$error]) ? $_SESSION[$error] : "";
@@ -107,11 +138,24 @@ class Order extends Model
         return $message;
     }
 
+    /**
+     * Atualiza a informação de uma mensagem
+     *
+     * @param string $error
+     * @param string $message
+     * @return void
+     */
     public static function setError($error, $message)
     {
         $_SESSION[$error]= $message;
     }
 
+    /**
+     * Limpa o valor de uma mensagem
+     *
+     * @param string $error
+     * @return void
+     */
     public static function clearError($error)
     {
         if(isset($_SESSION[$error]))
