@@ -22,7 +22,7 @@ $app->get("/profile", function(){
 	$page->setTpl('profile', [
 		'user'=>$user->getValues(),
 		'profileMsg'=>User::getError($_SESSION[User::SUCCESS]),
-		'profileError'=>User::getError($_SESSION[User::ERROR])
+		'profileError'=>User::getError(User::ERROR)
 	]);
 
 });
@@ -38,7 +38,7 @@ $app->post("/profile", function(){
 	//Verifica se o usuário não deixou o nome em branco
 	if(!isset($_POST['desperson']) || $_POST['desperson'] ==='')
 	{
-		User::setError($_SESSION[User::ERROR], 'Preencha seu nome');
+		User::setError(User::ERROR, 'Preencha seu nome');
 		header("Location: /profile");
 		exit;
 	}
@@ -46,7 +46,7 @@ $app->post("/profile", function(){
 	//Verifica se o usuário não deixou o email em branco
 	if(!isset($_POST['desemail']) || $_POST['desemail'] ==='')
 	{
-		User::setError($_SESSION[User::ERROR], 'Preencha seu email');
+		User::setError(User::ERROR, 'Preencha seu email');
 		header("Location: /profile");
 		exit;
 	}
@@ -56,7 +56,7 @@ $app->post("/profile", function(){
 	{
 		if(User::checkLoginExist($_POST['desemail']))
 		{
-			User::setError($_SESSION[User::ERROR],'Endereço de email ja está sendo utilizado por outro usuário');
+			User::setError(User::ERROR,'Endereço de email ja está sendo utilizado por outro usuário');
 			header("Location: /profile");
 			exit;
 		}
@@ -125,7 +125,7 @@ $app->get("/profile/change-password", function(){
 	$page = new Page();
 
 	$page->setTpl("profile-change-password", [
-		"changePassError"=>User::getError($_SESSION[User::ERROR]),
+		"changePassError"=>User::getError(User::ERROR),
 		"changePassSuccess"=>User::getError($_SESSION[User::SUCCESS])
 	]);
 
@@ -137,14 +137,14 @@ $app->post("/profile/change-password", function(){
 
 	if(!isset($_POST['current_pass']) || $_POST['current_pass']==='')
 	{
-		User::setError($_SESSION[User::ERROR], "Preencha o campo senha atual ");
+		User::setError(User::ERROR, "Preencha o campo senha atual ");
 		header("Location: /profile/change-password");
 		exit;
 	}
 
 	if(!isset($_POST['new_pass']) || $_POST['new_pass']==='')
 	{
-		User::setError($_SESSION[User::ERROR], "Preencha o campo nova senha!");
+		User::setError(User::ERROR, "Preencha o campo nova senha!");
 		header("Location: /profile/change-password");
 		exit;
 
@@ -152,21 +152,21 @@ $app->post("/profile/change-password", function(){
 
 	if(!isset($_POST['new_pass_confirm']) || $_POST['new_pass_confirm']==='')
 	{
-		User::setError($_SESSION[User::ERROR], "Preencha o campo confirmar nova senha!");
+		User::setError(User::ERROR, "Preencha o campo confirmar nova senha!");
 		header("Location: /profile/change-password");
 		exit;
 	}
 
 	if($_POST['current_pass']===$_POST['new_pass'])
 	{
-		User::setError($_SESSION[User::ERROR], "Sua nova senha deve ser diferente da atual");
+		User::setError(User::ERROR, "Sua nova senha deve ser diferente da atual");
 		header("Location: /profile/change-password");
 		exit;
 	}
 
 	if($_POST['new_pass']!==$_POST['new_pass_confirm'])
 	{
-		User::setError($_SESSION[User::ERROR], "Os campos senha e nova senha possuem valores diferentes");
+		User::setError(User::ERROR, "Os campos senha e nova senha possuem valores diferentes");
 		header("Location: /profile/change-password");
 		exit;
 	}
@@ -185,7 +185,7 @@ $app->post("/profile/change-password", function(){
 	}
 	else
 	{
-		User::setError($_SESSION[User::ERROR], "Senha atual invalida!");
+		User::setError(User::ERROR, "Senha atual invalida!");
 		header("Location: /profile/change-password");
 		exit;
 

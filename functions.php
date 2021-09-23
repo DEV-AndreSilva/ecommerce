@@ -42,6 +42,11 @@ function getUserName()
     return $user->getdesperson();
 }
 
+/**
+ * Método responsável por retornar a quantidade total de produtos de um carrinho
+ *
+ * @return void
+ */
 function getCartNrqtd()
 {
     $cart= Cart::getFromSession();
@@ -51,6 +56,11 @@ function getCartNrqtd()
     return $totals['nrqtd'];
 }
 
+/**
+ * Método responsável por retornar o preço do carrinho
+ *
+ * @return void
+ */
 function getCartPrice()
 {
     $cart= Cart::getFromSession();
@@ -60,8 +70,29 @@ function getCartPrice()
     return formatPrice($totals['vlprice']);
 }
 
+/**
+ * Método responsável por retornar uma data formatada
+ *
+ * @param string $date
+ * @return void
+ */
 function formatDate($date)
 {
 
     return date('d/m/Y',strtotime($date));
 }
+
+/**
+ * Método responsável por ajudar nos testes de variavel
+ *
+ * @param mixed $variavel
+ * @return void
+ */
+function debug($variavel)
+{
+    echo "<pre>";
+    var_dump($variavel);
+    echo "</pre>";
+}
+
+

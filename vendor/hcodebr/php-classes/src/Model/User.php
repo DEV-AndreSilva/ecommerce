@@ -443,42 +443,43 @@ class User extends Model
 
     }
 
+   /**
+     * Retorna uma mensagem 
+     *
+     * @param string $error
+     * @return void
+     */
+    public static function getError($error)
+    {
+        $message = isset($_SESSION[$error]) ? $_SESSION[$error] : "";
+        Order::clearError($error);
+        return $message;
+    }
+
     /**
-     * Método responsável por atualizar uma mensagem de erro
+     * Atualiza a informação de uma mensagem
      *
      * @param string $error
      * @param string $message
      * @return void
      */
-    public static function setError(&$error,$message)
+    public static function setError($error, $message)
     {
-        $error=$message;
+        $_SESSION[$error]= $message;
     }
 
     /**
-     * Método responsável por retornar uma mensagem de erro
-     *
-     * @param string $error
-     * @return string
-     */
-    public static function getError(&$error)
-    {
-        $message= (isset($error) && $error)? $error : '';
-
-        User::clearError($error);
-
-        return $message;
-    }
-
-    /**
-     * Método responsável por limpar a mensagem de erro para que ela não seja exibida na tela
+     * Limpa o valor de uma mensagem
      *
      * @param string $error
      * @return void
      */
-    public static function clearError(&$error)
+    public static function clearError($error)
     {
-        $error = NUll;
+        if(isset($_SESSION[$error]))
+        {
+            unset($_SESSION[$error]);
+        }
     }
 
     /**

@@ -242,7 +242,8 @@ class Cart extends Model
         $sql= new Sql();
 
         $results = $sql->select(
-       "SELECT SUM(a.vlprice) AS vlprice, SUM(a.vlwidth) AS vlwidth, SUM(a.vlheight) AS vlheight, SUM(a.vllength) AS vllength, SUM(a.vlweight) AS vlweight, COUNT(*) AS nrqtd
+       "SELECT SUM(a.vlprice) AS vlprice, SUM(a.vlwidth) AS vlwidth, SUM(a.vlheight) AS vlheight,
+        SUM(a.vllength) AS vllength, SUM(a.vlweight) AS vlweight, COUNT(*) AS nrqtd
         FROM tb_products a 
         INNER JOIN tb_cartsproducts b ON a.idproduct=b.idproduct
         WHERE b.idcart = :idcart AND b.dtremoved IS NULL ",

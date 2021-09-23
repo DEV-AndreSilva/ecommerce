@@ -10,8 +10,8 @@ $app->get("/login", function(){
 	$page = new Page();
 
 	$page->setTpl("login",[
-		'error'=>User::getError( $_SESSION[User::ERROR]),
-		'error_register'=>User::getError($_SESSION[User::ERROR_REGISTER]),
+		'error'=>User::getError(User::ERROR),
+		'error_register'=>User::getError(User::ERROR_REGISTER),
 		'register_values'=>(isset($_SESSION['registerValues'])) ? $_SESSION['registerValues'] : 
 		['name'=>'', 'email'=>'', 'phone'=>'']
 	]);
@@ -28,7 +28,7 @@ $app->post("/login", function()
 	}
 	catch(Exception $ex)
 	{
-		User::setError($_SESSION[User::ERROR] , $ex->getMessage());
+		User::setError(User::ERROR , $ex->getMessage());
 		header("Location: /login");
 		exit;
 	}
@@ -51,14 +51,14 @@ $app->post('/register', function(){
 
 	if(!isset($_POST['name']) || $_POST['name']=='')
 	{
-		User::setError($_SESSION[User::ERROR_REGISTER], "Preencha o campo nome");	
+		User::setError(User::ERROR_REGISTER, "Preencha o campo nome");	
 		header("Location: /login");
 		exit;
 	}
 
 	if(!isset($_POST['email']) || $_POST['email']=='')
 	{
-		User::setError($_SESSION[User::ERROR_REGISTER], "Preencha o campo email");	
+		User::setError(User::ERROR_REGISTER, "Preencha o campo email");	
 		header("Location: /login");
 		exit;
 		
@@ -66,7 +66,7 @@ $app->post('/register', function(){
 
 	if(!isset($_POST['password']) || $_POST['password']=='')
 	{
-		User::setError($_SESSION[User::ERROR_REGISTER], "Preencha o campo senha");	
+		User::setError(User::ERROR_REGISTER, "Preencha o campo senha");	
 		header("Location: /login");
 		exit;
 	}
@@ -95,7 +95,7 @@ $app->post('/register', function(){
 	}
 	else
 	{
-		User::setError($_SESSION[User::ERROR_REGISTER],"Esse endereço de email ja pertence a outro usuário");
+		User::setError(User::ERROR_REGISTER,"Esse endereço de email ja pertence a outro usuário");
 		
 		header('Location: /login');
 		exit;

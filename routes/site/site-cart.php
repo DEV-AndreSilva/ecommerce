@@ -84,9 +84,6 @@ $app->post("/cart/freight", function(){
 
 	$cart->setFreight($_POST['zipcode']);
 
-	//var_dump($_POST);
-	//exit;
-
 	$cart->getCalculateTotal();
 
 	header("location: /cart");

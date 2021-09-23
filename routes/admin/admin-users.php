@@ -3,6 +3,62 @@
 use \Hcode\Pages\PageAdmin;
 use \Hcode\Model\User;
 
+
+//Rota GET - Página de alteração de senha de usuario acessado pelo administrador
+$app->get("/admin/users/password",function(){
+
+	User::verifyLogin();
+
+	$user = new User();
+	$user->get((int)$_GET['id_user']);
+	$page = new PageAdmin();
+
+	$page->setTpl("users-password",[
+		'user'=>$user->getValues(),
+		'msgError'=>User::getError(User::ERROR),
+		'msgSuccess'=>User::getError(User::SUCCESS)
+	]);
+	
+	
+});
+
+//Rota POST - Alteração de senha de usuário
+$app->post("/admin/users/:iduser/password",function($iduser){
+
+	User::verifyLogin();
+
+	$user = new User();
+	$user->get((int)$iduser);
+
+	if(!isset($_POST["despassword"]) || $_POST["despassword"]=="")
+	{
+		$user->setError(User::ERROR, "Digita uma senha para ser alterada");
+		header("Location: /admin/users/password?id_user=$iduser");
+		exit;
+	}
+
+	if(!isset($_POST["despassword-confirm"]) || $_POST["despassword-confirm"]=="")
+	{
+		$user->setError(User::ERROR, "Confirme a nova senha para ser alterada");
+		header("Location: /admin/users/password?id_user=$iduser");
+		exit;
+	}
+
+	if($_POST["despassword"] != $_POST["despassword-confirm"])
+	{
+		$user->setError(User::ERROR, "As senhas precisam ser iguais");
+		header("Location: /admin/users/password?id_user=$iduser");
+		exit;
+	}
+
+	$user->setPassword($_POST['despassword']);
+
+	$user->setError(User::SUCCESS, "Senha alterada com sucesso !");
+	header("Location: /admin/users/password?id_user=$iduser");
+	exit;
+});
+
+
 //rota GET - Pagina de exibição de todos os usuários
 $app->get('/admin/users', function()
 {
@@ -90,17 +146,6 @@ $app->post('/admin/users/:iduser',function($iduser)
 	$user->get((int)$iduser);
 
 	$_POST['inadmin']=isset($_POST['inadmin']) ? 1 :0;
-
-	//Se o administrador alterou a senha do usuário
-	if((isset($_POST['despassword']) && !empty($_POST['despassword'])))
-	 {
-		$_POST['despassword']= USER::getPasswordHash($_POST['despassword']); 
-	 }
-	 else
-	 {
-		$_POST['despassword'] = $user->getdespassword();
-	 } 
-
 	
 	$user->setData($_POST);
 	$user->update();
