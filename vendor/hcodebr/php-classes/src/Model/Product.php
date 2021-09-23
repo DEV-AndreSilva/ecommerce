@@ -248,7 +248,7 @@ class Product extends Model
     }
 
     /**
-     * Método responsável por gerenciar a paginação de categorias por um parametro de busca
+     * Método responsável por gerenciar a paginação de produtos por um parametro de busca
      */
     public static function getPaginationSearch($search,$currentPage=1,$itemsPerPage=10)
     {

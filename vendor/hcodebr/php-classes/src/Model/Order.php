@@ -164,4 +164,85 @@ class Order extends Model
         }
     }
 
+    /**
+     * Método responsável por gerenciar a paginação
+     *
+     * @param integer $currentPage
+     * @param integer $itemsPerPage
+     * @return void
+     */
+    public static function getPagination($currentPage=1,$itemsPerPage=10)
+    {
+        $start = ($currentPage-1)* $itemsPerPage;
+        $sql = new sql();
+
+        $results = $sql->select("SELECT SQL_CALC_FOUND_ROWS
+                    a.idorder,a.idcart,a.iduser,a.idstatus,a.idaddress,a.vltotal,a.dtregister,
+                    b.deszipcode,b.vlfreight,
+                    d.desstatus,
+                    e.desaddress,e.desdistrict,e.descity,e.desstate,
+                    f.desperson
+                
+                    FROM tb_orders a 
+                    JOIN tb_carts b ON b.idcart = a.idcart
+                    JOIN tb_users c ON c.iduser = a.iduser
+                    JOIN tb_ordersstatus d ON d.idstatus=a.idstatus
+                    JOIN tb_addresses e ON e.idaddress = a.idaddress
+                    JOIN tb_persons f ON f.idperson=a.iduser
+                    ORDER BY a.dtregister DESC
+                    LIMIT $start,$itemsPerPage"
+                    );
+
+        $resultTotal=$sql->select("SELECT FOUND_ROWS() AS nrtotal");
+
+        $data = [
+            "pageData"=>$results,
+            'totalUsers'=>(int)$resultTotal[0]['nrtotal'],
+            'totalPages'=>ceil($resultTotal[0]['nrtotal']/$itemsPerPage),
+        ];
+
+        return $data;
+    }
+
+    /**
+     * Método responsável por gerenciar a paginação de Ordens de serviço por um parametro de busca
+     */
+    public static function getPaginationSearch($search,$currentPage=1,$itemsPerPage=10)
+    {
+
+        $start = ($currentPage-1)* $itemsPerPage;
+        $sql = new sql();
+
+        $results = $sql->select("SELECT SQL_CALC_FOUND_ROWS
+                    a.idorder,a.idcart,a.iduser,a.idstatus,a.idaddress,a.vltotal,a.dtregister,
+                    b.deszipcode,b.vlfreight,
+                    d.desstatus,
+                    e.desaddress,e.desdistrict,e.descity,e.desstate,
+                    f.desperson
+                
+                    FROM tb_orders a 
+                    JOIN tb_carts b ON b.idcart = a.idcart
+                    JOIN tb_users c ON c.iduser = a.iduser
+                    JOIN tb_ordersstatus d ON d.idstatus=a.idstatus
+                    JOIN tb_addresses e ON e.idaddress = a.idaddress
+                    JOIN tb_persons f ON f.idperson=a.iduser
+                    WHERE c.deslogin LIKE :user OR f.desperson LIKE :user OR a.idorder = :id
+                    ORDER BY a.dtregister DESC
+                    LIMIT $start,$itemsPerPage",[
+                        ":user"=>"%".$search."%",
+                        ":id"=>$search
+                    ]);
+
+        $resultTotal=$sql->select("SELECT FOUND_ROWS() AS nrtotal");
+
+        $data = [
+            "pageData"=>$results,
+            'totalUsers'=>(int)$resultTotal[0]['nrtotal'],
+            'totalPages'=>ceil($resultTotal[0]['nrtotal']/$itemsPerPage),
+        ];
+
+        return $data;
+    }
+   
+
 }

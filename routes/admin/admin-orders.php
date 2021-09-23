@@ -101,8 +101,38 @@ $app->get("/admin/orders", function(){
 
     $page = new PageAdmin();
 
+    
+    $search = isset($_GET['search']) ? $_GET['search'] : "";
+	$pageAtual = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+
+	//se o usuário esta buscando algum registro
+	if($search != "")
+	{
+		$pagination = Order::getPaginationSearch($search,$pageAtual);
+	}
+	else
+	{
+		$pagination = Order::getPagination($pageAtual);
+	}
+
+	$pages = [];
+
+	//constroi os links das paginas
+	for($x = 0 ; $x<$pagination['totalPages']; $x++)
+	{
+		array_push($pages, [
+			"href"=>"/admin/orders?".http_build_query([
+				'page'=>$x+1,
+				'search'=>$search
+			]),
+			"text"=>$x+1
+		]);
+	}
+
     $page->setTpl("orders",[
-        "orders"=>Order::listAll()
+        "orders"=>$pagination['pageData'],
+        "search"=>$search,
+        "pages"=>$pages
     ]);
 });
 

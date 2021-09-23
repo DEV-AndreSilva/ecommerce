@@ -562,7 +562,7 @@ class User extends Model
     }
 
     /**
-     * Método responsável por gerenciar a paginação quando é feito buscas
+     * Método responsável por gerenciar a paginação quando é feito buscas de usuários
      *
      * @param string $search
      * @param integer $currentPage
