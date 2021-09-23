@@ -10,12 +10,40 @@ $app->get('/admin/categories',function(){
 
 	User::verifyLogin();
 
-	$categories= Category::listAll();
+	$search = isset($_GET['search']) ? $_GET['search'] : "";
+	$pageAtual = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+
+	//se o usuário esta buscando algum registro
+	if($search != "")
+	{
+		$pagination = Category::getPaginationSearch($search,$pageAtual);
+	}
+	else
+	{
+		$pagination = Category::getPagination($pageAtual);
+	}
+
+	$pages = [];
+
+	//constroi os links das paginas
+	for($x = 0 ; $x<$pagination['totalPages']; $x++)
+	{
+		array_push($pages, [
+			"href"=>"/admin/categories?".http_build_query([
+				'page'=>$x+1,
+				'search'=>$search
+			]),
+			"text"=>$x+1
+		]);
+	}
+
 
 	$page= new PageAdmin();
 
 	$page->setTpl("categories", array(
-		"categories"=>$categories
+		"categories"=>$pagination['pageData'],
+		"search"=>$search,
+		"pages"=>$pages
 	));
 
 });

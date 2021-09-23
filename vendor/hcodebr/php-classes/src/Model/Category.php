@@ -250,6 +250,63 @@ class Category extends Model
         return $pages;
     }
 
+    /**
+     * Método responsável por gerenciar a paginação
+     *
+     * @param integer $currentPage
+     * @param integer $itemsPerPage
+     * @return void
+     */
+    public static function getPagination($currentPage=1,$itemsPerPage=10)
+    {
+        $start = ($currentPage-1)* $itemsPerPage;
+        $sql = new sql();
+
+        $results = $sql->select("SELECT SQL_CALC_FOUND_ROWS *
+                    FROM tb_categories
+                    ORDER BY descategory
+                    LIMIT $start,$itemsPerPage"
+                    );
+
+        $resultTotal=$sql->select("SELECT FOUND_ROWS() AS nrtotal");
+
+        $data = [
+            "pageData"=>$results,
+            'totalUsers'=>(int)$resultTotal[0]['nrtotal'],
+            'totalPages'=>ceil($resultTotal[0]['nrtotal']/$itemsPerPage),
+        ];
+
+        return $data;
+    }
+
+    /**
+     * Método responsável por gerenciar a paginação de categorias por um parametro de busca
+     */
+    public static function getPaginationSearch($search,$currentPage=1,$itemsPerPage=10)
+    {
+
+        $start = ($currentPage-1)* $itemsPerPage;
+        $sql = new sql();
+
+        $results = $sql->select("SELECT SQL_CALC_FOUND_ROWS *
+                    FROM tb_categories
+                    WHERE descategory LIKE :category
+                    order by descategory
+                    LIMIT $start,$itemsPerPage",[
+                        ":category"=>"%".$search."%"
+                    ]);
+
+        $resultTotal=$sql->select("SELECT FOUND_ROWS() AS nrtotal");
+
+        $data = [
+            "pageData"=>$results,
+            'totalUsers'=>(int)$resultTotal[0]['nrtotal'],
+            'totalPages'=>ceil($resultTotal[0]['nrtotal']/$itemsPerPage),
+        ];
+
+        return $data;
+    }
+
 
 
 }
